@@ -1,0 +1,43 @@
+{
+  "dependencies": {
+    "base64-stream": "^0.1.3",
+    "imap": "^0.8.19",
+    "mailparser": "^0.6.1",
+    "nodemailer": "^1.11.0",
+    "poplib": "^0.1.7"
+  },
+  "description": "OPAL nodes to send and receive emails",
+  "directories": {},
+  "keywords": [
+    "node-red",
+    "email-send",
+    "email-listen",
+    "gmail",
+    "imap"
+  ],
+  "license": "GPL-3.0",
+  "maintainers": [
+    {
+      "name": "Balaraman Kunduvara",
+      "email": "balaraman@gmail.com"
+    }
+  ],
+  "name": "@torpadev/orpa-node-email",
+  "node-red": {
+    "nodes": {
+      "email": "emailprocess.js"
+    }
+  },
+  "devDependencies": {
+    "eslint": "^4.11.0",
+    "eslint-config-google": "^0.9.1",
+    "gulp": "^3.9.1",
+    "gulp-eslint": "^4.0.0",
+    "gulp-eslint-threshold": "^0.1.1",
+    "gulp-if": "^2.0.2"
+  },
+  "scripts": {
+    "lint": "gulp lint"
+  },
+  "version": "0.1.6"
+}

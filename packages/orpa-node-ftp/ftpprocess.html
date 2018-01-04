@@ -1,0 +1,144 @@
+<script type="text/x-red" data-template-name="ftp-service">
+	<div class="form-row">
+		<label for="node-input-host"><i class="fa fa-globe"></i> <span>Host</span></label>
+		<input type="text" id="node-input-host">
+		<input type="hidden" id="node-input-hostType" />
+	</div>
+	<div class="form-row">
+        <label for="node-input-port"><i class="fa fa-empire"></i> <span>Port</span></label>
+        <input type="text" id="node-input-port">
+        <input type="hidden" id="node-input-portType" />
+	</div>
+	<div class="form-row">
+		<label for="node-input-filename"><i class="fa fa-globe"></i> <span>Filename</span></label>
+		<input type="text" id="node-input-filename">
+		<input type="hidden" id="node-input-filenameType" />
+	</div>
+	<div class="form-row">
+		<label for="node-input-mode"><i class="fa fa-globe"></i> <span>Mode</span></label>
+		<select id="node-input-mode" style="width:125px !important">
+            <option value="READ">READ</option>
+            <option value="WRITE">WRITE</option>
+        </select>
+	</div>
+	<div class="form-row">
+		<label for="node-input-location"><i class="fa fa-globe"></i> <span>Location</span></label>
+		<input type="text" id="node-input-location">
+		<input type="hidden" id="node-input-locationType" />
+	</div>
+	<div class="form-row">
+		<label for="node-input-remoteLocation"><i class="fa fa-globe"></i> <span>Remote &nbsp;&nbsp;Location</span></label>
+		<input type="text" id="node-input-remoteLocation">
+		<input type="hidden" id="node-input-remoteLocationType" />
+	</div>
+	<div class="form-row">
+		<label for="node-input-user"><i class="fa fa-globe"></i> <span>Username</span></label>
+		<input type="text" id="node-input-user">
+		<input type="hidden" id="node-input-userType" />
+	</div>
+	<div class="form-row">
+		<label for="node-input-password"><i class="fa fa-globe"></i> <span>Password</span></label>
+		<input type="password" id="node-input-password">
+		<input type="hidden" id="node-input-passwordType" />
+	</div>
+</script>
+
+<script type="text/x-red" data-help-name="ftp-service">
+	<p>Connects to a ftp server and helps to read or write the specified file.</p>
+	<strong>Inputs:</strong>
+	<p><ul>
+	    <li><a>Host</a>: Specify the IP or hostname of the FTP server</li>
+		<li><a>Port</a>: Specify the port number of FTP server</li>
+		<li><a>Filename</a>:Specify the filename to be transferred</li>
+		<li><a>Mode</a>: Specify the type of operation. READ / WRITE a file.</li>
+		<li><a>Location</a>: Specify the location of the file to be uploaded</li>
+		<li><a>Remote Location</a>: Specify the remote location of the file on the FTP server</li>
+		<li><a>Username</a>: Specify the username for connecting to FTP server</li>
+		<li><a>Password</a>: Specify the password for connecting to FTP server</li>
+	</ul></p>
+	<strong>Outputs:</strong>
+	<p><code>msg.error</code> When an error happens contains the error message from underlying database connection</p>
+	<p><code>msg.payload</code> contains the data read from database query</p>
+</script>
+
+<script type="text/javascript">
+//FIXME: Move this helper to a generic RED.utils like location so that it can be used across nodes
+	function makeTypedInputFields(inpList) {
+		console.log('makeTypedInputFields')
+		inpList.forEach((inpItem) => {
+			console.log('TI:%s-%s-%s-%s', inpItem.name, inpItem.type, inpItem.valid.toString(), inpItem.inst);
+			var inpId = "#node-input-" + inpItem.name;
+			var inpTypeId = "#node-input-" + inpItem.type;
+			$(inpTypeId).val(inpItem.inst);
+			$(inpId).typedInput({
+				default: inpItem.d,
+				typeField: $(inpTypeId),
+				types: [...inpItem.valid]
+			});
+			$(inpId).typedInput('type', inpItem.inst);
+		});
+	}
+
+	RED.nodes.registerType('ftp-service', {
+		category : 'utilities',
+		defaults : {
+			host : { value : "", required: true, validate: RED.validators.typedInput("hostType")},
+			hostType: { value: "str" },
+            port : { value : "21",  required : true, validate: RED.validators.typedInput("portType")},
+			portType: { value: "str" },
+			filename:{ value : "",  required : true, validate: RED.validators.typedInput("filenameType")},
+			filenameType: { value: "str" },
+			mode : {
+				value : "READ",
+				required:true
+			},
+			location : { value : "", validate: RED.validators.typedInput("locationType")},
+			locationType: { value: "str" },
+			remoteLocation : { value : "", validate: RED.validators.typedInput("remoteLocationType")},
+			remoteLocationType: { value: "str" },
+			user : { value : "", validate: RED.validators.typedInput("userType")},
+			userType: { value: "str" },
+			password : { value : "", validate: RED.validators.typedInput("passwordType")},
+			passwordType: { value: "str" },
+			timeout : {
+				value : 3000,
+				required : true,
+				validate : RED.validators.number()
+			}
+		},
+		color : "#F5B041",
+		inputs : 1,
+		outputs : 1,
+		icon : "ftp.png",
+		label : function() {
+			return this.name ||  "FTP service";
+		},
+		labelStyle : function() {
+			return this.name ? "node_label_italic" : "";
+		},oneditprepare: function () {
+			
+			//TypeInput Start
+			//INFO: Provides the widget to select the type of input value (including vavriables)
+			makeTypedInputFields([
+				{ name: 'host', type: 'hostType', valid: ['global', 'flow', 'str'], inst: this.hostType, d: 'str' },
+				{ name: 'port', type: 'portType', valid: ['global', 'flow', 'str'], inst: this.portType, d: 'str' },
+				{ name: 'filename', type: 'filenameType', valid: ['global', 'flow', 'str'], inst: this.filenameType, d: 'str' },
+				{ name: 'location', type: 'locationType', valid: ['global', 'flow', 'str'], inst: this.locationType, d: 'str' },
+				{ name: 'remoteLocation', type: 'remoteLocationType', valid: ['global', 'flow', 'str'], inst: this.remoteLocationType, d: 'str' },
+				{ name: 'user', type: 'userType', valid: ['global', 'flow', 'str'], inst: this.userType, d: 'str' },
+				{ name: 'password', type: 'passwordType', valid: ['global', 'flow', 'str'], inst: this.passwordType, d: 'str' }
+			]);
+
+			
+			
+
+		},
+		oneditsave: function () {
+			var selectedVal = $('#node-input-mode option:selected').val();
+			if (selectedVal === 'cols') {
+				var cols = $('#read-mode-row-cols').val();
+
+			}
+		}
+	}); 
+</script>

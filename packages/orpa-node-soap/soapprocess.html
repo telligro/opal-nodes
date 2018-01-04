@@ -1,0 +1,88 @@
+<script type="text/x-red" data-template-name="soap-service">
+	<div class="form-row">
+		<label for="node-input-url"><i class="fa fa-globe"></i> <span>Url</span></label>
+		<input type="text" id="node-input-url">
+		<input type="hidden" id="node-input-urlType" />
+	</div>
+	<div class="form-row">
+        <label for="node-input-method"><i class="fa fa-empire"></i> <span>Method</span></label>
+        <input type="text" id="node-input-method">
+        <input type="hidden" id="node-input-methodType" />
+	</div>
+	<div class="form-row">
+		<label for="node-input-parameters"><i class="fa fa-globe"></i> <span>Parameters</span></label>
+		<input type="text" id="node-input-parameters">
+		<input type="hidden" id="node-input-parametersType" />
+	</div>
+	<div class="form-row">
+		<label for="node-input-headers"><i class="fa fa-globe"></i> <span>Headers</span></label>
+		<input type="text" id="node-input-headers">
+		<input type="hidden" id="node-input-headersType" />
+	</div>
+</script>
+
+<script type="text/x-red" data-help-name="soap-service">
+	<p>Connects to a soap service and provides the response.</p>
+	<strong>Inputs:</strong>
+	<p><ul>
+	    <li><a>Url</a>: Specify the url for soap request</li>
+		<li><a>Method</a>: Specify the methods to invoke based on the wsdl</li>
+		<li><a>Parameters</a>:Specify the parameters in json format</li>
+		<li><a>Headers</a>: Specify the header for the request</li>
+	</ul></p>
+	<strong>Outputs:</strong>
+	<p><code>msg.error</code> When an error happens contains the error message from underlying database connection</p>
+	<p><code>msg.payload</code> contains the data read from database query</p>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('soap-service', {
+		category : 'utilities',
+		defaults : {
+			url : { value : "", required: true, validate: RED.validators.typedInput("urlType")},
+			urlType: { value: "str" },
+            method : { value : "", required : true , validate: RED.validators.typedInput("methodType") },
+            methodType: { value: "str" },
+			parameters:{ value: "", required:true, validate: RED.validators.typedInput("parametersType")},
+			parametersType: { value: "str" },
+			headers : { value : "" , validate: RED.validators.typedInput("headersType")},
+			headersType: { value: "str" },
+			timeout : {
+				value : 3000,
+				required : true,
+				validate : RED.validators.number()
+			}
+		},
+		color : "#F5B041",
+		inputs : 1,
+		outputs : 1,
+		icon : "soap.png",
+		label : function() {
+			return this.name ||  "Soap Request";
+		},
+		labelStyle : function() {
+			return this.name ? "node_label_italic" : "";
+		},oneditprepare: function () {
+			
+			//TypeInput Start
+			//INFO: Provides the widget to select the type of input value (including vavriables)
+			makeTypedInputFields([
+				{ name: 'url', type: 'urlType', valid: ['global', 'flow', 'str'], inst: this.urlType, d: 'str' },
+				{ name: 'method', type: 'methodType', valid: ['global', 'flow', 'str'], inst: this.methodType, d: 'str' },
+				{ name: 'parameters', type: 'parametersType', valid: ['global', 'flow', 'str'], inst: this.parametersType, d: 'str' },
+				{ name: 'headers', type: 'headersType', valid: ['global', 'flow', 'str'], inst: this.headersType, d: 'str' }
+			]);
+
+			
+			
+
+		},
+		oneditsave: function () {
+			var selectedVal = $('#node-input-mode option:selected').val();
+			if (selectedVal === 'cols') {
+				var cols = $('#read-mode-row-cols').val();
+
+			}
+		}
+	}); 
+</script>

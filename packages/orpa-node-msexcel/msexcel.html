@@ -1,0 +1,493 @@
+<script type="text/x-red" data-template-name="read-excel">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
+		<input type="text" id="node-input-name" />
+	</div>
+	<div class="form-row">
+		<label for="node-input-location"><i class="fa fa-file"></i> <span>File Path</span></label>
+		<input type="text" id="node-input-location" style="width:70%">
+		<input type="hidden" id="node-input-locationType" />
+	</div>
+	<div class="form-row">
+		<label for="node-input-sheet"><i class="fa fa-file-text"></i> <span>Sheet</span></label>
+		<input type="text" id="node-input-sheet" style="width:70%">
+		<input type="hidden" id="node-input-sheetType" />
+	</div>
+	<div class="form-row">
+		<label for="node-input-mode"><i class="fa fa-cog"></i> <span>Read Mode</span></label>
+		<select id="node-input-mode" style="width:125px !important">
+            <option value="full">Full Contents</option>
+            <option value="rows">Rows</option>
+            <option value="cols">Columns</option>
+            <option value="region">Region</option>
+        </select>
+	</div>
+	<div class="form-row read-mode-row" id="read-mode-row-rows">
+		<label for="node-input-rows"><i class="fa fa-bars"></i> <span>Rows</span></label>
+		<input type="text" id="node-input-rows" style="width:70%" />
+		<input type="hidden" id="node-input-rowsType" />
+	</div>
+	<div class="form-row read-mode-row" id="read-mode-row-cols">
+		<label for="node-input-cols"><i class="fa fa-columns"></i> <span>Columns</span></label>
+		<input type="text" id="node-input-cols" style="width:70%" />
+		<input type="hidden" id="node-input-colsType" />
+	</div>
+	<div class="form-row read-mode-row" id="read-mode-row-region">
+		<label for="node-input-region"><i class="fa fa-table"></i> <span>Region</span></label>
+		<input type="text" id="node-input-region" style="width:70%" />
+		<input type="hidden" id="node-input-regionType" />
+	</div>
+	<div class="form-row output-json-row" id="output-json-row-options1">
+		<input type="hidden" id="node-input-asis" />
+		<div id="output-json-row-options" class="output-json-row-options">
+			<div>
+				<div id="output-json-row-asjson">
+					<label><input id="node-input-asjson" type='checkbox' checked/> <span>As JSON</span></label>
+				</div>
+				<div id="output-json-row-useLabel">
+					<label><input id="node-input-useLabelC" type='checkbox'/> <span>Use Column Labels</span></label>
+					<input type="hidden" id="node-input-useLabel" />
+				</div>
+				<div id="output-json-row-removeEmpty">
+					<label><input id="node-input-removeEmptyC" type='checkbox'/> <span>Remove Empty Rows</span></label>
+					<input type="hidden" id="node-input-removeEmpty" />
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- <div class="form-row">
+		<label for="node-input-contents"><i class="fa fa-sign-out"></i> <span>Contents</span></label>
+		<input type="text" id="node-input-contents"/>
+	</div> -->
+
+	<div class="form-row">
+		<label for="node-input-store"><i class="fa fa-empire"></i> <span>Store</span></label>
+		<input type="text" id="node-input-store" style="width:70%" />
+		<input type="hidden" id="node-input-storeType" />
+	</div>
+</script>
+<style>
+	.output-json-row {
+		padding-left: 110px;
+	}
+
+	.output-json-row select {
+		margin: 3px 0;
+	}
+
+	.output-json-row-options input {
+		width: auto;
+	}
+
+	.output-json-row-options span {
+		font-size: 10px;
+		overflow-wrap: normal;
+	}
+
+	.output-json-row-options label {
+		width: auto;
+		overflow-wrap: normal;
+	}
+</style>
+<script type="text/x-red" data-help-name="read-excel">
+	<p>Opens an xlsx or xls file spreasheet from a specified location and reads the contents. The contents can then be passed to
+		downstream node or saved to a store variable</p>
+	<strong>Inputs:</strong>
+	<p>
+		<ul>
+			<li><a>Name</a>: A Name for this read-excel instance</li>
+			<li><a>File Path</a>: choose the location from where the spreadsheet can be read</li>
+			<li><a>Sheet</a>: specify the name of the sheet to be read (E.g. Sheet 1)</li>
+			<li><a>Read Mode</a>: specify the mode used for reading. This can be </b>Full Content</b>,</b>Rows</b>,</b>Colummns</b>,</b>Region</b>
+				<ul>
+					<li><b>Full Contents</b> - Fetches the entirer contents of the specified sheet</li>
+					<li><b>Rows</b> - A comma separated list of Numbers of the Rows that are to be fetched.</li>
+					<li><b>Columns</b> - A comma separated list of Names(e.g. A, B, AA etc) of the columns that are to be fetched</li>
+					<li><b>Region</b> - A region notation as deinfed by this MSDN article (<a href="https://msdn.microsoft.com/en-us/library/bb211395(v=office.12).aspx"
+						 target="blank">Range Notation<</a>). Only single range expression is supported.</li>
+				</ul>
+			</li>
+			<li><a>Output Formats</a>: The output of the read operation can be a Simple JSON (Array of Arrays or Colmn Header indexed
+				objects) with only the data or a more descriptive format. Details can be found from the xlsx project
+				<ul>
+					<li><b>As Json</b> - Uses the simple JSON format</li>
+					<li><b>Use Column Labels</b> - Use column headers such A,B etc to index the data rather using Array of Array. Only for JSON
+						mode
+					</li>
+					<li><b>Remove Empty Rows</b> - Removes Empty Rows fromm a JSON output. Only for JSON mode</li>
+				</ul>
+			</li>
+			<li><a>Timeout</a>: specify the timeout during lookup for the title operation.</li>
+		</ul>
+	</p>
+	<strong>Outputs:</strong>
+	<p><code>msg.error</code> When an error happens contains the error message from underlying Excel reading </p>
+	<p><code>msg.payload</code> contains the data read from spreadsheet</p>
+</script>
+
+<script type="text/javascript">
+	//FIXME: Move this helper to a generic RED.utils like location so that it can be used across nodes
+	function makeTypedInputFields(inpList) {
+		console.log('makeTypedInputFields')
+		inpList.forEach((inpItem) => {
+			console.log('TI:%s-%s-%s-%s', inpItem.name, inpItem.type, inpItem.valid.toString(), inpItem.inst);
+			var inpId = "#node-input-" + inpItem.name;
+			var inpTypeId = "#node-input-" + inpItem.type;
+			$(inpTypeId).val(inpItem.inst);
+			$(inpId).typedInput({
+				default: inpItem.default,
+				typeField: $(inpTypeId),
+				types: [...inpItem.valid]
+			});
+			$(inpId).typedInput('type', inpItem.inst);
+		});
+	}
+
+	RED.nodes.registerType('read-excel', {
+		category: 'msexcel',
+		defaults: {
+			name: {
+				value: ""
+			},
+			location: { value: "", validate: RED.validators.typedInput("locationType") },
+			locationType: { value: "str" },
+			mode: {
+				value: "full",
+				required: true
+			},
+			sheet: { value: "Sheet1", validate: RED.validators.typedInput("sheetType") },
+			sheetType: { value: "str" },
+			rows: { value: "", validate: RED.validators.typedInput("rowsType") },
+			rowsType: { value: "str" },
+			cols: { value: "", validate: RED.validators.typedInput("colsType") },
+			colsType: { value: "str" },
+			region: { value: "", validate: RED.validators.typedInput("regionType") },
+			regionType: { value: "str" },
+			asjson: {
+				value: true
+			},
+			asis: {
+				value: false
+			},
+			useLabel: {
+				value: false
+			},
+			removeEmpty: {
+				value: false
+			},
+			store: { value: "", validate: RED.validators.typedInput("storeType") },
+			storeType: { value: "str" },
+			timeout: {
+				value: 3000,
+				required: true,
+				validate: RED.validators.number()
+			}
+		},
+		color: "#ecf0f1",
+		inputs: 1,
+		outputs: 1,
+		icon: "excel.png",
+		label: function () {
+			return this.name || "Read Excel";
+		},
+		labelStyle: function () {
+			return this.name ? "node_label_italic" : "";
+		},
+		oneditprepare: function () {
+			//FIXME:Cleanup
+			//console.log('P useLabel %s', this.useLabel);
+			//console.log('P removeEmpty %s', this.removeEmpty);
+			//console.log('P asis %s', this.asis);
+			//console.log('P asjson %s', this.asjson);
+
+			//TypeInput Start
+			//INFO: Provides the widget to select the type of input value (including vavriables)
+			var optionDoNotSave = {value:"nul",label:'Not Stored',hasValue:false};
+			makeTypedInputFields([
+				{ name: 'location', type: 'locationType', valid: ['global', 'flow', 'str'], inst: this.locationType, default: 'str' },
+				{ name: 'sheet', type: 'sheetType', valid: ['global', 'flow', 'str'], inst: this.sheetType, default: 'str' },
+				{ name: 'rows', type: 'rowsType', valid: ['global', 'flow', 'str'], inst: this.rowsType, default: 'str' },
+				{ name: 'cols', type: 'colsType', valid: ['global', 'flow', 'str'], inst: this.colsType, default: 'str' },
+				{ name: 'region', type: 'regionType', valid: ['global', 'flow', 'str'], inst: this.regionType, default: 'str' },
+				{ name: 'store', type: 'storeType', valid: ['global', 'flow', optionDoNotSave], inst: this.storeType, default: 'nul' }
+			]);
+
+			//FIXME:Cleanup
+			// $("#node-input-locationType").val(this.locationType);
+			// $("#node-input-location").typedInput({
+			// 	default: 'str',
+			// 	typeField: $("#node-input-locationType"),
+			// 	types: ['flow', 'global', 'str']
+			// });
+			// $("#node-input-location").typedInput('type', this.locationType);
+
+			//TypeInput End
+
+			$('#node-input-mode').change(function () {
+				var selectedVal = $('#node-input-mode option:selected').val();
+				//
+				switch (selectedVal) {
+					case 'rows':
+						$('#read-mode-row-rows').show();
+						$('#read-mode-row-cols').hide();
+						$('#read-mode-row-region').hide();
+						$('.output-json-row').show();
+						break;
+					case 'cols':
+						$('#read-mode-row-rows').hide();
+						$('#read-mode-row-cols').show();
+						$('#read-mode-row-region').hide();
+						$('.output-json-row').show();
+						break;
+					case 'region':
+						$('#read-mode-row-rows').hide();
+						$('#read-mode-row-cols').hide();
+						$('#read-mode-row-region').show();
+						$('.output-json-row').show();
+						break;
+					default:
+						$('.read-mode-row').hide();
+						$('.output-json-row').show();
+				}
+
+			});
+
+			$('#node-input-asjson').change(function () {
+				if (this.checked) {
+					// $('#node-input-asis').val('false');
+					$('#output-json-row-useLabel').show();
+					$('#output-json-row-removeEmpty').show();
+				} else {
+					// $('#node-input-asis').val('true');
+					$('#output-json-row-useLabel').hide();
+					$('#output-json-row-removeEmpty').hide();
+				}
+			});
+
+			//FIXME: Cleanup, This workaround below needs to be addressed. 
+			//values from below porperties should get automatically populated like the rest
+
+			$('#node-input-useLabelC').change(function () {
+				if (this.checked) {
+					//console.log('Use Label Checked')
+					$('#node-input-useLabel').val('true');
+				} else {
+					//console.log('Use Label UnChecked')
+					$('#node-input-useLabel').val('false');
+				}
+			});
+			$('#node-input-removeEmptyC').change(function () {
+				if (this.checked) {
+					$('#node-input-removeEmpty').val('true');
+				} else {
+					$('#node-input-removeEmpty').val('false');
+				}
+			});
+
+
+			//console.log(typeof this.useLabel);
+			if (this.useLabel === 'true') {
+				//console.log('UseLabel True');
+				$('#node-input-useLabel').val('true');
+				$('#node-input-useLabelC').prop('checked', true);
+			} else {
+				//console.log('UseLabel False');
+				$('#node-input-useLabel').val('false');
+				$('#node-input-useLabelC').prop('checked', false);
+			}
+
+			if (this.removeEmpty === 'true') {
+				$('#node-input-removeEmpty').val('true');
+				$('#node-input-removeEmptyC').prop('checked', true);
+			} else {
+				$('#node-input-removeEmpty').val('false');
+				$('#node-input-removeEmptyC').prop('checked', false);
+			}
+
+			$('.read-mode-row').hide();
+
+		},
+		oneditsave: function () {
+			var selectedVal = $('#node-input-mode option:selected').val();
+			if (selectedVal === 'cols') {
+				var cols = $('#read-mode-row-cols').val();
+
+			}
+		}
+	});
+
+</script>
+<script type="text/x-red" data-template-name="write-excel">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
+		<input type="text" id="node-input-name" />
+	</div>
+	<div class="form-row">
+		<label for="node-input-location"><i class="fa fa-file"></i> <span>File Path</span></label>
+		<input type="text" id="node-input-location" style="width:70%">
+		<input type="hidden" id="node-input-locationType" />
+	</div>
+	<div class="form-row">
+		<label for="node-input-sheet"><i class="fa fa-file-text"></i> <span>Sheet</span></label>
+		<input type="text" id="node-input-sheet" style="width:70%">
+		<input type="hidden" id="node-input-sheetType" />
+	</div>
+	<div class="form-row">
+		<label for="node-input-mode"><i class="fa fa-cog"></i> <span>Read Mode</span></label>
+		<select id="node-input-mode" style="width:125px !important">
+            <option value="full">Full Contents</option>
+            <option value="rows">Rows</option>
+            <option value="cols">Columns</option>
+            <option value="region">Region</option>
+        </select>
+	</div>
+	<div class="form-row write-mode-row" id="write-mode-row-rows">
+		<label for="node-input-rows"><i class="fa fa-bars"></i> <span>Rows</span></label>
+		<input type="text" id="node-input-rows" style="width:70%" />
+		<input type="hidden" id="node-input-rowsType" />
+	</div>
+	<div class="form-row write-mode-row" id="write-mode-row-cols">
+		<label for="node-input-cols"><i class="fa fa-columns"></i> <span>Columns</span></label>
+		<input type="text" id="node-input-cols" style="width:70%" />
+		<input type="hidden" id="node-input-colsType" />
+	</div>
+	<div class="form-row write-mode-row" id="write-mode-row-region">
+		<label for="node-input-region"><i class="fa fa-table"></i> <span>Region</span></label>
+		<input type="text" id="node-input-region" style="width:70%" />
+		<input type="hidden" id="node-input-regionType" />
+	</div>
+	<div class="form-row">
+		<label for="node-input-contents"><i class="fa fa-sign-in"></i> <span>Contents</span></label>
+		<input type="text" id="node-input-contents" />
+		<input type="hidden" id="node-input-contentsType" />
+	</div>
+	<!-- <div class="form-row">
+		<label for="node-input-store"><i class="fa fa-empire"></i> <span>Context Variable</span></label>
+		<input type="text" id="node-input-store"/>
+	</div> -->
+</script>
+
+<script type="text/x-red" data-help-name="write-excel">
+	<p>Creates or Opens an xlsx/xls file spreasheet from the specified location and write the contents that are provided. The contents
+		can be from upstream actions, variables (flow/global) or provided as literal text</p>
+	<strong>Inputs:</strong>
+	<p>
+		<ul>
+			<li><a>Name</a>: choose the location from where the spreadsheet can be read</li>
+			<li><a>File Path</a>: choose the location from where the spreadsheet can be read</li>
+			<li><a>Sheet</a>: specify the name of the sheet to be read (E.g. Sheet 1)</li>
+			<li><a>Write Mode</a>: specify the mode used for reading. This can be </b>Full Content</b>,</b>Rows</b>,</b>Colummns</b>,</b>Region</b>
+				<ul>
+					<li><b>Full Contents</b> - Updates the entire contents of the specified sheet - TBD</li>
+					<li><b>Rows</b> - A comma separated list of Numbers of the Rows that are to be updated.</li>
+					<li><b>Columns</b> - A comma separated list of Names(e.g. A, B, AA etc) of the columns that are to be fetched</li>
+					<li><b>Region</b> - A region notation as deinfed by this MSDN article (<a href="https://msdn.microsoft.com/en-us/library/bb211395(v=office.12).aspx"
+						 target="blank">Range Notation<</a>). Only single range expression is supported.</li>
+				</ul>
+			</li>
+			<li><a>Input Formats</a>: The input data to be written to the spreradsheet is always provided as an array of arrays. This
+				is expected to be a valid json. Use the below guidelines. A JSON formatter will be available in a later release.
+				<ul>
+					<li><b>Number</b> - Specified as is without quotes</li>
+					<li><b>String</b> - Specified with surrounding quotes</li>
+					<li><b>Boolean</b> - Specified as is without quotes</li>
+					<li><b>Date</b> - Specified like a string with surrounding quotes. The list of date formats shown below are support and
+						will be automatically parsed. Others maybe set as text. The list of supported formats will be configurable in a later
+						release
+					</li>
+				</ul>
+			</li>
+			<li><a>Timeout</a>: specify the timeout during lookup for the title operation.</li>
+		</ul>
+	</p>
+	<strong>Outputs:</strong>
+	<p><code>msg.error</code> When an error happens contains the error message from underlying Excel reading </p>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('write-excel', {
+		category: 'msexcel',
+		defaults: {
+			name: {
+				value: ""
+			},
+						location: { value: "", validate: RED.validators.typedInput("locationType") },
+			locationType: { value: "str" },
+			mode: {
+				value: "full",
+				required: true
+			},
+			sheet: { value: "Sheet1", validate: RED.validators.typedInput("sheetType") },
+			sheetType: { value: "str" },
+			rows: { value: "", validate: RED.validators.typedInput("rowsType") },
+			rowsType: { value: "str" },
+			cols: { value: "", validate: RED.validators.typedInput("colsType") },
+			colsType: { value: "str" },
+			region: { value: "", validate: RED.validators.typedInput("regionType") },
+			regionType: { value: "str" },
+			contents: { value: "", validate: RED.validators.typedInput("contentsType") },
+			contentsType: { value: "str" },
+			timeout: {
+				value: 3000,
+				required: true,
+				validate: RED.validators.number()
+			}
+		},
+		color: "#ecf0f1",
+		inputs: 1,
+		outputs: 1,
+		icon: "excel.png",
+		label: function () {
+			return this.name || "Write Excel";
+		},
+		labelStyle: function () {
+			return this.name ? "node_label_italic" : "";
+		},
+		oneditprepare: function () {
+			//console.log('P useLabel %s', this.useLabel);
+			//console.log('P removeEmpty %s', this.removeEmpty);
+			//console.log('P asis %s', this.asis);
+			//console.log('P asjson %s', this.asjson);
+
+						//INFO: Provides the widget to select the type of input value (including vavriables)
+			makeTypedInputFields([
+				{ name: 'location', type: 'locationType', valid: ['global', 'flow', 'str'], inst: this.locationType, default: 'str' },
+				{ name: 'sheet', type: 'sheetType', valid: ['global', 'flow', 'str'], inst: this.sheetType, default: 'str' },
+				{ name: 'rows', type: 'rowsType', valid: ['global', 'flow', 'str'], inst: this.rowsType, default: 'str' },
+				{ name: 'cols', type: 'colsType', valid: ['global', 'flow', 'str'], inst: this.colsType, default: 'str' },
+				{ name: 'region', type: 'regionType', valid: ['global', 'flow', 'str'], inst: this.regionType, default: 'str' },
+				{ name: 'contents', type: 'contentsType', valid: ['global', 'flow', 'str'], inst: this.contentsType, default: 'str' }
+			]);
+
+			$('#node-input-mode').change(function () {
+				var selectedVal = $('#node-input-mode option:selected').val();
+				//
+				switch (selectedVal) {
+					case 'rows':
+						$('#write-mode-row-rows').show();
+						$('#write-mode-row-cols').hide();
+						$('#write-mode-row-region').hide();
+
+						break;
+					case 'cols':
+						$('#write-mode-row-rows').hide();
+						$('#write-mode-row-cols').show();
+						$('#write-mode-row-region').hide();
+
+						break;
+					case 'region':
+						$('#write-mode-row-rows').hide();
+						$('#write-mode-row-cols').hide();
+						$('#write-mode-row-region').show();
+
+						break;
+					default:
+						$('.write-mode-row').hide();
+
+				}
+
+			});
+		}
+	});
+
+</script>

@@ -1,0 +1,40 @@
+{
+  "name": "@torpadev/orpa-node-msexcel",
+  "version": "0.1.4",
+  "description": "MS Excel Read/Write nodes for OPAL",
+  "dependencies": {
+    "check-types": ">=7.3.0",
+    "fs-extra": ">=4.0.2",
+    "is-utf8": ">=0.2.1",
+    "moment": "^2.19.1",
+    "q": ">=1.5.0",
+    "xlsx": ">=0.11.5"
+  },
+  "license": "GPL-3.0",
+  "keywords": [
+    "node-red",
+    "excel",
+    "opal"
+  ],
+  "node-red": {
+    "nodes": {
+      "msexcel": "msexcel.js"
+    }
+  },
+  "engines": {
+    "node": ">= 6.9.0"
+  },
+  "author": "Shiva <shiva.madhavan@gmail.com>",
+  "devDependencies": {
+    "eslint": "^4.11.0",
+    "eslint-config-google": "^0.9.1",
+    "gulp": "^3.9.1",
+    "gulp-eslint": "^4.0.0",
+    "gulp-eslint-threshold": "^0.1.1",
+    "gulp-if": "^2.0.2"
+  },
+  "main": "msexcel.js",
+  "scripts": {
+    "lint": "gulp lint"
+  }
+}

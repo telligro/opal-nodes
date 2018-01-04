@@ -1,0 +1,443 @@
+
+<!-- TODO: Move this to a Common template shared by all nodes in this module -->
+<script type="text/javascript" src="plugins/app.js"></script>
+<script type="text/javascript" src="vendor/wgxpath.install.js"></script>
+<script type="text/javascript" src="vendor/parsley.min.js"></script>
+<link rel="stylesheet" href="vendor/parsley.css">
+<link rel="stylesheet" href="plugins/css/style.css">
+<script type="text/x-red" data-template-name="web-page">
+    <div id="errInvalidNote" class="bs-callout bs-callout-warning hidden">
+        <h5>Invalid:</h5>
+        <p></p>
+    </div>
+
+    <div id="errExistingPage" class="bs-callout bs-callout-warning hidden">
+        <h5>Page Exists</h5>
+        <div class="msg"></div>
+        <div class="controls pull-right"></div>
+        <br/>
+        <br/>
+    </div>
+
+    <div id="errPageInUse" class="bs-callout bs-callout-warning hidden">
+        <h5>This page is in use</h5>
+        <p></p>
+    </div>
+
+    <div class="bs-callout bs-callout-info hidden">
+        <h5>Yay!</h5>
+        <p>Everything seems to be ok :)</p>
+    </div>
+    <div class="form-row">
+        <ul style="background: #fff; min-width: 600px; margin-bottom: 20px;" id="node-config-web-page-tabs"></ul>
+    </div>
+    <div id="node-config-web-page-tabs-content" style="min-height: 170px;">
+        <div id="web-page-tab-elements" style="display:none">
+            <div class="form-row node-config-input-name">
+                <label for="node-config-input-name">
+                    <i class="fa fa-tag"></i>
+                    <span>Name</span>
+                </label>
+                <input class="input-append-left" type="text" id="node-config-input-name" data-parsley-errors-messages-disabled data-parsley-required
+                    data-parsley-required-message="Name is required" data-parsley-name-unique="Page Name" data-parsley-name-unique-page="" placeholder="Page Name" />
+            </div>
+            <div class="form-row node-config-input-url">
+                <label for="node-config-input-url">
+                    <i class="fa fa-globe"></i>
+                    <span>Url</span>
+                </label>
+                <input class="input-append-left" type="text" id="node-config-input-url" placeholder="URL" data-parsley-errors-messages-disabled
+                    data-parsley-required data-parsley-type="url" data-parsley-type-message="Valid URL is required" data-parsley-required-message="Valid URL is required" style="width:calc(70% - 76px)" />
+                <a id="plugin-command-obj-finder-url" class="editor-button">
+                    <i style="color:#43a047" class="fa fa-search"></i>
+                </a>
+                <a id="plugin-command-obj-finder-url-new" class="editor-button">
+                    <i style="color:#43a047" class="fa fa-search-plus"></i>
+                </a>
+                <!-- <i id="url-error" style="padding-left: 110px;"></i> -->
+            </div>
+            <div class="form-row node-config-input-framePath">
+                <label for="node-config-input-framePath">
+                    <i class="fa fa-file"></i>
+                    <span>Frame</span>
+                </label>
+                <input class="input-append-left" type="text" id="node-config-input-framePath" placeholder="BODY" />
+            </div>
+            <!-- <div class="form-row xnode-config-input-elements">
+                <label for="xnode-config-input-elements"><i class="fa fa-crosshairs"></i> <span>Elements</span></label>
+                <ol id="xnode-config-input-elements"></ol>
+            </div> -->
+            <div class="form-row xnode-config-input-markers">
+                <label for="xnode-config-input-markers">
+                    <i class="fa fa-marker"></i>
+                    <span>Markers</span>
+                </label>
+                <ol id="xnode-config-input-markers"></ol>
+            </div>
+
+        </div>
+    </div>
+</script>
+
+<script type="text/javascript">
+    wgxpath.install({document: {}})
+    window.Parsley.on('field:validated', function(fieldInstance) {
+        var ok = $('.parsley-error').length === 0;
+        // $('.bs-callout-info').toggleClass('hidden', !ok);
+        if (!ok) {
+            let errMsges;
+            if ($('.parsley-error').parsley().length !== undefined) {
+                errMsges = $('.parsley-error').parsley().map(e => e.getErrorsMessages()).join('<br/>');
+            } else {
+                errMsges = $('.parsley-error').parsley().getErrorsMessages().join('<br/>');
+            }
+            // console.log('Field Validated %s %s', fieldInstance.$element.attr('id'), errMsges);
+            $('#errInvalidNote h5').html(errMsges)
+        }
+        $('#errInvalidNote').toggleClass('hidden', ok);
+    });
+
+    // window.Parsley.on('field:error', function(fieldInstance) {
+    //   var ok = !fieldInstance.$element.hasClass('parsley-error');
+    //   console.log('Field Error %s', !ok);
+    //   //  $('.bs-callout-warning h5').text(fieldInstance.getErrorsMessages().join(';'))
+    // });
+    // window.Parsley.on('field:validate', function(ev) {
+    //   console.log('validating %s', ev.$element.attr('id'));
+    // });
+    // window.Parsley.on('form:validate', function(ev) {
+    //   console.log('Fvalidate %s', ev.$element.attr('id'));
+    // });
+    // window.Parsley.on('form:validated', function(ev) {
+    //   console.log('Fvalidated %s', ev.$element.attr('id'));
+    // });
+        function getAllWebPages(ignoreList) {
+            let webPages = [];
+            ignoreList = ignoreList ? ignoreList : [];
+            RED.nodes.eachConfig((n) => {
+                if (n.type == 'web-page' && !(ignoreList.includes(n.id))) {
+                    webPages.push(n);
+                }
+            });
+            return webPages;
+        }
+
+        function getSimilarPage(pageConfig, pageId) {
+            console.log('PageConfig %j', pageConfig);
+            return getAllWebPages([pageId]).find(page => {
+                console.log('page', page);
+                return fastDeepEqual(pageConfig, {url: page.url});
+                //, framePath, markers, name
+            });
+        }
+
+        window.Parsley.addValidator('nameUnique', {
+            validateString: function(value, propName, options) {
+                console.log(arguments);
+                console.log('Checking ', value, ' to be a unique ', propName);
+                return getAllWebPages([options.page.id]).find(page=> page.name===value) === undefined;
+                // names.split(',').find(value => value === name);
+            },
+            requirementType: {
+                '':'string',
+                'page': 'object',
+                'element':'object',
+                'validator':'string',
+            },
+            messages: {
+                en: '%s should be unique'
+            }
+        });
+        const Services = require('ServiceManager');
+        const webUtils = require('WebNodeUtils').instance;
+        const fastDeepEqual = require('fast-deep-equal');
+    window.finderActive = false;
+    RED.nodes.registerType('web-page', {
+        category: 'config',
+        defaults: {
+            url: {
+                value: "",
+                // required:true,
+                validate: function(value) {
+                    console.log('V:URL %s', this.name); let urlElm = $('#node-config-input-url'); urlElm.val(urlElm.val().trim()); return $('#node-config-input-url').parsley().validate() === true;
+                }
+            },
+            name: {
+                value: "",
+                // required: true,
+                // $('#node-config-input-name').attr('data-parsley-name-unique-pageA', JSON.stringify({id: this.id}));
+                // $('#node-config-input-name').parsley().options.isUniquePage = JSON.stringify({id: this.id});
+                validate: function(value){console.log('V:Name %s', this.name); $('#node-config-input-name').attr('data-parsley-name-unique-page', JSON.stringify({id: this.id}));return $('#node-config-input-name').parsley().validate() === true;}
+            },
+            framePath: {
+                value: "Main Frame",
+                required: false
+            },
+            markers: {
+                value: [{
+                    name: '',
+                    expression: '',
+                    exclude: false
+                }]
+            },
+            sessionId: {
+                value: "",
+                required: true
+            }
+        },
+        label: function() {
+            return (this.name ? this.name : "UNNAMED");
+        },
+        oneditprepare: async function() {
+            var tabs = RED.tabs.create({
+                id: "node-config-web-page-tabs",
+                onchange: function(tab) {
+                    $("#node-config-web-page-tabs-content").children().hide();
+                    $("#" + tab.id).show();
+                }
+            });
+            tabs.addTab({
+                id: "web-page-tab-elements",
+                label: this.name ? this.name : "Page "
+            });
+            var node = this;
+            console.log(node);
+            console.log(node._def);
+            if (node._def.callerContext) {
+                console.log('callerContext:', node._def.callerContext);
+                $('#node-config-input-url').val(node._def.callerContext);
+            } else {
+                console.log('NO-callerContext');
+            }
+
+            $("#xnode-config-input-markers").css('min-height', '250px').css('min-width', '450px').editableList({
+                addItem: function(container, i, element) {
+                    console.log('Adding Items %j', element);
+                    console.log('I is %j', i)
+                    // if (!element.hasOwnProperty('model')) {
+                    //     element.model = 'sensor_ht';
+                    // }
+                    var row = $('<div/>').appendTo(container);
+                    $('<label/>', {for: "node-config-input-name-" + i, style: "margin-left: 3px; width: 30px;vertical-align:middle; font-size:80%;"}).text("Name").appendTo(row);
+                    var name = $('<input/>', {id: "node-config-input-name-" + i, type: "text", style: "width:auto;vertical-align:top"}).appendTo(row);
+                    $('<label/>', {for: "node-config-input-expression-" + i, style: "margin-left: 7px; width: 35px;vertical-align:middle; font-size:80%;"}).text("Value").appendTo(row);
+                    var expression = $('<input/>', {id: "node-config-input-expression-" + i, type: "text", style: "width:auto;vertical-align:top"}).appendTo(row);
+                    // $('<label/>',{for:"node-config-input-excludde-"+i, style:"margin-left: 7px; width: 35px;vertical-align:middle; font-size:70%;"}).text("Exclude").appendTo(row);
+                    var exclude = $('<input/>', {id: "node-config-input-expression-" + i, type: "checkbox", style: "width:auto;vertical-align:top"}).appendTo(row);
+                    $('<label/>', {for: "node-input-rule-exclude-" + i, style: "margin-left: 3px;"}).text('Exclude').appendTo(row);
+                    name.val(element.name);
+                    expression.val(element.expression);
+                    if (element.exclude) {
+                        exclude.prop('checked', true);
+                    } else {
+                        exclude.prop('checked', false);
+                    }
+                    // exclude.val(element.expression);
+                    console.log(row);
+                    console.log('All added')
+                },
+                removeItem: function(opt) {
+                },
+                sortItems: function(rules) {
+                },
+                sortable: false,
+                removable: true
+            });
+
+            console.log("markers: " + JSON.stringify(node.markers));
+            for (var i = 0; i < this.markers.length; i++) {
+                var element = this.markers[i];
+                $("#xnode-config-input-markers").editableList('addItem', element);
+            }
+
+            //TODO: DRY
+            async function initFinderConnection() {
+                if (window.backend === undefined) {
+                    window.backend = await Services.serviceManager.setEndpoint(window.location.hostname).createRemoteService('FinderPluginSvc');
+                    console.log('Created');
+                }
+                window.backend.on('ObjectFound', result => {
+                    let resData = result ? result.data : result;
+                    console.log('Page:Got Data');
+                    console.log('Page:DATA:%j', resData);
+
+                    if (resData && resData.url && webUtils.isValidUrl(resData.url)) {
+
+                        console.log('Got Result with url, Checking Similarity');
+                        let urlWoQuery = webUtils.getUrlParts(resData.url).path;
+                        let similarPage = getSimilarPage({url: urlWoQuery}, node.id);
+                        if (similarPage) {
+                            // , framePath, markers, name
+                            console.log('Found Similar Page');
+                            console.log(similarPage);
+                            let spName = similarPage.name ? similarPage.name : "UNNAMED";
+                            $('#errExistingPage div.msg').html('<code>' + urlWoQuery + '</code> exists in <code>' + spName + '</code>');
+                            $('#errExistingPage div.controls').html('<button id="editExisting" class="btn btn-default">Edit ' + spName + '</button> <button id="continueAdding" class="btn btn-default">Add as New</button>');
+                            
+                            $('#editExisting').click(() => {
+                                console.log('similarPage', similarPage);
+                                RED.editor.editConfig("", similarPage.type, similarPage.id);
+                                $('#errExistingPage').addClass('hidden');
+                                //TODO: DO we need to blacnk what's already present ?
+                                $('#node-config-input-url').val('');
+                                $('#node-config-input-url').parsley().validate();
+                            });
+
+                            $('#continueAdding').click(() => {
+                                console.log('NotEditing', similarPage);
+                                $('#errExistingPage').addClass('hidden');
+                                $('#node-config-input-url').val(urlWoQuery.trim());
+                                $('#node-config-input-url').parsley().validate();
+
+                            });
+
+                            $('#errExistingPage').removeClass('hidden');
+                        } else {
+                            console.log('noSimilarPage')
+                            $('#node-config-input-url').val(urlWoQuery.trim());
+                            $('#node-config-input-url').parsley().validate();
+                        }
+
+
+                    } else {
+                        console.log('No Data from finder or invalid url');
+                    }
+                    // $('#node-config-input-selector').val('xpath');
+                    if (resData.target.framePath && resData.target.framePath.length > 0) {
+                        $('#node-config-input-framePath').val(resData.target.framePath);
+                    }
+                });
+                return Promise.resolve();
+            };
+//TODO: DRY
+            await initFinderConnection();
+            if (window.sessionId !== undefined) {
+                $('#node-config-input-sessionId').val(window.sessionId);
+            }
+            window.finderActive = false;
+
+            var errCount = 0;
+
+            async function activateFinder(pageObj, isSearchNew) {
+                console.log('Activating Finder %j', pageObj);
+                await window.backend.send('connectToBrowser', {sessionId: window.sessionId, url: pageObj.url}).then(async (res) => {
+                    console.log('connectToBrowser Response : %j', res);
+                    if (res) {
+                        console.log('errCount %s', errCount)
+                        if (res.error) {
+                            errCount++;
+                            window.sessionId = undefined;
+                            if (res.error.indexOf('connectToBrowser: Could not look up object with id') !== -1) {
+                                window.backend.dispose();
+                                delete window.backend;
+                                console.log('Re-initializing');
+                                await initFinderConnection();
+                            }
+
+                            if (errCount < 10) {
+                                await activateFinder(pageObj);
+                            } else {
+                                return Promise.reject('Launch failed: ' + res.error);
+                            }
+                        }
+                    } else {
+                        console.log('FIXME:Invalid Scenario')
+                    }
+                    window.sessionId = res.sessionId;
+                    $('#node-config-input-sessionId').val(window.sessionId);
+                    let editorBtnId = isSearchNew ? '#plugin-command-obj-finder-url-new' : '#plugin-command-obj-finder-url';
+                    let searchfa = isSearchNew ? 'fa-search' : 'fa-search-plus';
+                    try {
+                        window.finderActive = true;
+                        var startFinderOk = await window.backend.send('startFinder', {sessionId: window.sessionId});
+                        console.log('startFinderOk %s', startFinderOk);
+                        console.log('Stop Iconify %s', editorBtnId + ' i');
+                        $(editorBtnId + ' i').removeClass().addClass('fa fa-stop').css('color', '#960808');
+                    } catch (ex) {
+                        console.log('Error in remote start');
+                        $(editorBtnId + ' i').removeClass().addClass('fa ' + searchfa).css('color', '#43a047');
+                        return Promise.reject('Finder not started: Remote Start failed: ' + ex.message);
+                        console.log(ex);
+                    }
+                });
+                return Promise.resolve(window.finderActive);
+            }
+            $('.node-config-input-url').on('click.objFinderPugin', '#plugin-command-obj-finder-url, #plugin-command-obj-finder-url-new',
+                async clickEvt => {
+                    console.log('Clicked Finder');
+                    let isSearchNew = $(clickEvt.currentTarget).attr('id') === 'plugin-command-obj-finder-url-new';
+                    let searchfa = isSearchNew ? 'fa-search-plus' : 'fa-search';
+                    let urlElm = $('#node-config-input-url');
+                    urlElm.val(urlElm.val().trim());
+                    const pageUrl = isSearchNew ? urlElm.val() : '';
+                    if (!webUtils.isValidUrl(pageUrl)) {
+                        $('#node-config-input-url').attr('placeholder', 'Need a valid URL');
+                        //return;
+                    }
+                    if (!window.finderActive) {
+                        $(clickEvt.currentTarget).find('i').removeClass().addClass('fa fa-spinner fa-pulse fa-fw');
+                        await activateFinder({url: pageUrl}, isSearchNew);
+                    } else {
+                        try {
+                            window.finderActive = false;
+                            var stopFinderOk = await window.backend.send('stopFinder', {sessionId: window.sessionId});
+                            $(clickEvt.currentTarget).find('i').removeClass().addClass('fa ' + searchfa).css('color', '#43a047');
+                        } catch (ex) {
+                            console.log('Page: Error in remote stop');
+                            console.log(ex);
+                        }
+                    }
+                });
+            //Init Parseley Validation
+            // $('#node-config-input-name').attr('data-parsley-name-unique-page', JSON.stringify({id:node.id}));
+            console.log('Setting Validators');
+            $('#node-config-input-name').parsley().options.nameUniquePage= JSON.stringify({id: node.id});
+            $('#node-config-input-name').attr('data-parsley-name-unique-page', JSON.stringify({id: node.id}));
+            //  $('#node-config-input-name').parsley().validate();
+            // $('#node-config-input-name').parsley().options.nameUniquePage = JSON.stringify({id: node.id});
+            // $('#node-config-input-name').attr('data-parsley-name-unique-page', JSON.stringify({id: node.id}));
+            $('#node-config-input-url').parsley();
+            setTimeout(function() {
+                //$('#node-config-dialog-edit-form').parsley().validate();
+                tabs.resize();
+            }, 0);
+        },
+        oneditsave: async function() {
+            //Handle Element Saving
+            // var elements = $("#xnode-config-input-elements").editableList('items');
+            var node = this;
+            var fp = $("node-config-input-framePath");
+            if ($(fp).val() == "") {
+                this.framePath = "'Main Frame";
+            }
+            //Handle Marker saving
+            var markers = $("#xnode-config-input-markers").editableList('items');
+            var node = this;
+            var markersArray = [];
+            markers.each(function(i) {
+                var markerElement = $(this);
+                var name = markerElement.find("#node-config-input-name-" + i).val();
+                var expression = markerElement.find("#node-config-input-expression-" + i).val();
+                var exclude = markerElement.find("#node-config-input-exclude-" + i).prop('checked');
+                console.log(expression, name);
+                var marker = {};
+                marker['name'] = name;
+                marker['expression'] = expression;
+                marker['exclude'] = exclude;
+                console.log(marker);
+                markersArray.push(marker);
+            });
+            node.markers = markersArray;
+            console.log("markers-list: " + JSON.stringify(node.markers));
+            try {
+                window.finderActive = false;
+                var stopFinderOk = await window.backend.send('stopFinder', {sessionId: window.sessionId});
+                console.log('Page OnSave: stopFinderOk %s', stopFinderOk);
+            } catch (ex) {
+                console.log('Page OnSave: Error in remote stop');
+                console.log(ex);
+            }
+        }
+    });
+</script>
+

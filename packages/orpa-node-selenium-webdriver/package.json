@@ -1,0 +1,79 @@
+{
+	"name": "@torpadev/orpa-node-selenium-webdriver",
+	"version": "0.1.11",
+	"description": "selenium-webdriver nodes for OPAL. Inspired by node-red-node-selenium-webdriver",
+	"dependencies": {
+		"@torpadev/orpa-page-object-finder": "~0.1.0",
+		"easyimage": ">=2.1.0",
+		"fast-deep-equal": "^1.0.0",
+		"fs-extra": ">=0.30.0",
+		"q": "^1.5.1",
+		"selenium-webdriver": ">=3.6.0",
+		"verror": "^1.10.0"
+	},
+	"license": "GPL-3.0",
+	"keywords": [
+		"node-red",
+		"selenium-webdriver"
+	],
+	"node-red": {
+		"nodes": {
+			"selenium-webdriver": "selenium-webdriver.js",
+			"web-element": "web-element.js",
+			"web-page": "web-page.js"
+		}
+	},
+	"engines": {
+		"node": ">= 8.7.0"
+	},
+	"author": {
+		"name": "parodot",
+		"email": "orpayuser@yahoo.com"
+	},
+	"scripts": {
+		"build-debug": "browserify ./ServiceManager.js:ServiceManager -d > plugins/servicemanager.bundle.js",
+		"build-release": "browserify -r ./ServiceManager.js:ServiceManager > plugins/servicemanager.bundle.js",
+		"build-min": "uglifyjs --compress --mangle -- plugins/servicemanager.bundle.js > plugins/servicemanager.min.js",
+		"build": "npm run build-release && npm run build-min"
+	},
+	"devDependencies": {
+		"babel": "^6.23.0",
+		"babel-core": "^6.26.0",
+		"babel-preset-es2015": "^6.24.1",
+		"babelify": "^8.0.0",
+		"browserify": "^14.5.0",
+		"eslint": "^4.11.0",
+		"eslint-config-google": "^0.9.1",
+		"gulp": "^3.9.1",
+		"gulp-htmllint": "^0.0.14",
+		"gulp-sourcemaps": "^2.6.1",
+		"gulp-uglify": "^3.0.0",
+		"gulp-util": "^3.0.8",
+		"gulp-eslint": "^4.0.0",
+		"gulp-eslint-threshold": "^0.1.1",
+		"gulp-if": "^2.0.2",
+		"htmllint": "^0.7.0",
+		"pump": "^1.0.2",
+		"vinyl-buffer": "^1.0.0",
+		"vinyl-source-stream": "^1.1.0",
+		"webpack": "^3.8.1",
+		"webpack-dev-server": "^2.9.4"
+	},
+	"babel": {
+		"presets": [
+			"es2015"
+		]
+	},
+	"browserify": {
+		"transform": [
+			[
+				"babelify",
+				{
+					"presets": [
+						"es2015"
+					]
+				}
+			]
+		]
+	}
+}

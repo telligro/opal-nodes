@@ -1,0 +1,27 @@
+sudo: false
+language: node_js
+env:
+- CXX="g++-4.8" NODE_FOLDER=packages/orpa-node-msexcel
+- CXX="g++-4.8" NODE_FOLDER=packages/orpa-node-database
+- CXX="g++-4.8" NODE_FOLDER=packages/orpa-node-email
+- CXX="g++-4.8" NODE_FOLDER=packages/orpa-node-ftp
+- CXX="g++-4.8" NODE_FOLDER=packages/orpa-node-soap
+- CXX="g++-4.8" NODE_FOLDER=packages/orpa-node-control-flow
+- CXX="g++-4.8" NODE_FOLDER=packages/orpa-node-selenium-webdriver
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.8
+    - gcc-4.8
+node_js:
+- '9'
+- '8'
+- '6'
+script: npm install && gulp
+before_install: cd $NODE_FOLDER
+notifications:
+  hipchat:
+    rooms:
+      secure: kar43RotMVRyj5xggRcgJ+YFqe8wxOw5AWGRY4zYPsuQjtc330GDhv/yr/xoV6uXS+c86ssn6vz7WI6Px+yIMMl25MNCcLiL7TNcSeEKKSdqncOcay/XRzxXsBIAGoLhqr36FYHGzXQTHCgOed0n33wwOMyg5PRv/iIGo+mauFrVdhZTMByiPMrobuqiM8bj7KfKtzbC1C4OmTdzk1eF6rYHU42hJy1CPoweOphEONDaRIFrMLbMQZ3PO+Zn4SjfXO2ugfJ0gTC7/RrqlsQwhOCQBqddvc123F3OWjalwwIlmdZXZsGP7PoxgtS8ZnUh95sfT6uw2EWNZxJ8SXB3gxgwYclpREzOTYog135j5ZpLpp5tKauEZaELJeWDIOXnVj/xZanGn7SPmwDsh0BbtnI2YRqToWFxyR9Ysw7z0EwHpEZtC6SCVvkd717IY2Iqo93VG3iX4Ltl2hflODyr1VnwgTLd0foym1tRzQ0763CSpODh9aDthA3JrRCf1p6De9QXKiMJk0BojD/z6N7bRWiMBy03KAXP1sWxaNGYVj/duQqQQWTH7IbKHDB6ThIAHTcKHBNm2IL3LvYbQUBrcdZ97P9dfLG7cY54VG0vO5HFFHE8GLC2jPXilkrB20sFYd7Livt7EhZcXCPS7o2zL4YZ7Txq18VnEBRneaW+J4o=

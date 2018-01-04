@@ -1,0 +1,409 @@
+<script type="text/javascript" src="plugins/app.js"></script>
+<script type="text/javascript" src="vendor/wgxpath.install.js"></script>
+<script type="text/javascript" src="vendor/parsley.min.js"></script>
+<link rel="stylesheet" href="vendor/parsley.css">
+<link rel="stylesheet" href="plugins/css/style.css">
+<script type="text/x-red" data-template-name="web-element">
+    <div id="errInvalidNote" class="bs-callout bs-callout-warning hidden">
+        <h5>Invalid:</h5>
+        <p></p>
+    </div>
+    <div id="errExistingElement" class="bs-callout bs-callout-warning hidden">
+        <h5>Page Exists</h5>
+        <div class="msg"></div>
+        <div class="controls pull-right"></div>
+        <br/>
+        <br/>
+    </div>    
+    <div id="errPageMismatch" class="bs-callout bs-callout-warning hidden">
+        <h5>Page Mismatch</h5>
+        <div class="msg"></div>
+        <div class="controls pull-right"></div>
+        <br/>
+        <br/>
+    </div>
+    <div id="errNewPage" class="bs-callout bs-callout-warning hidden">
+        <h5>New Page Identified</h5>
+        <div class="msg"></div>
+        <div class="controls pull-right"></div>
+        <br/>
+        <br/>
+    </div>
+    <div id="errElementInUse" class="bs-callout bs-callout-warning hidden">
+        <h5>New Page Identified</h5>
+        <div class="msg"></div>
+        <div class="controls pull-right"></div>
+        <br/>
+        <br/>
+    </div>
+    <div class="form-row">
+        <ul style="background: #fff; min-width: 600px; margin-bottom: 20px;" id="node-config-web-element-tabs"></ul>
+    </div>
+    <div id="node-config-web-element-tabs-content" style="min-height: 170px;">
+        <div id="web-element-tab-elements" style="display:none">
+            <div class="form-row">
+                <label for="node-config-input-page">
+                    <i class="fa fa-file"></i>
+                    <span>Page</span>
+                </label>
+                <input type="text" id="node-config-input-page">
+            </div>
+            <div class="form-row node-config-input-name">
+                <label for="node-config-input-name">
+                    <i class="fa fa-tag"></i>
+                    <span>Name</span>
+                </label>
+                <input class="input-append-left" type="text" id="node-config-input-name" placeholder="Name" data-parsley-errors-messages-disabled data-parsley-required
+                    data-parsley-required-message="Name is required" data-parsley-name-uniqueel="Element Name" data-parsley-name-uniqueel-element="">
+                <input class="input-append-left" type="hidden" id="node-config-input-sessionId">
+            </div>
+            <div class="form-row node-config-input-expression">
+                <label for="node-config-input-expression">
+                    <i class="fa fa-globe"></i>
+                    <span>Expression</span>
+                </label>
+                 <div style="display: inline-block; position: relative; width: 70%; height: 20px;">
+                    <div style="position: absolute; left: 0px; right: 40px;">
+                <input class="input-append-left" type="text" id="node-config-input-expression" data-parsley-errors-messages-disabled
+                    data-parsley-required
+                    data-parsley-required-message="Expression is required"
+                    placeholder="Expression" style="width:100%">
+                    </div>
+                <a id="plugin-command-obj-finder" class="editor-button" style="position: absolute; right: 0px; top: 0px;">
+                    <i style="color:#43a047" class="fa fa-search"></i>
+                </a>
+                <!-- <a id="plugin-command-obj-finder-url-new" class="editor-button">
+                    <i style="color:#43a047" class="fa fa-search-plus"></i>
+                </a> -->
+            </div>
+            </div>
+            <div class="form-row">
+                <label for="node-config-input-selector">
+                    <i class="fa fa-cog"></i>
+                    <span>By</span>
+                </label>
+                <select id="node-config-input-selector" style="width:125px !important">
+                    <option value="id">id</option>
+                    <option value="name">name</option>
+                    <option value="link">link</option>
+                    <option value="xpath">xpath</option>
+                    <option value="tagName">tagName</option>
+                    <option value="className">className</option>
+                    <option value="linkText">linkText</option>
+                    <option value="cssSelector">cssSelector</option>
+                </select>
+            </div>
+            <div class="form-row node-config-input-framePath">
+                <label for="node-config-input-framePath">
+                    <i class="fa fa-file"></i>
+                    <span>Frame</span>
+                </label>
+                <input class="input-append-left" type="text" id="node-config-input-framePath" placeholder="BODY">
+            </div>
+        </div>
+    </div>
+</script>
+<script type="text/javascript">
+//TODO: DRY
+   wgxpath.install({document: {}})
+    window.Parsley.on('field:validated', function(fieldInstance) {
+        var ok = $('.parsley-error').length === 0;
+        // $('.bs-callout-info').toggleClass('hidden', !ok);
+        if (!ok) {
+            let errMsges;
+            if ($('.parsley-error').parsley().length !== undefined) {
+                errMsges = $('.parsley-error').parsley().map(e => e.getErrorsMessages()).join('<br/>');
+            } else {
+                errMsges = $('.parsley-error').parsley().getErrorsMessages().join('<br/>');
+            }
+            // console.log('Field Validated %s %s', fieldInstance.$element.attr('id'), errMsges);
+            $('#errInvalidNote h5').html(errMsges)
+        }
+        $('#errInvalidNote').toggleClass('hidden', ok);
+    });
+//TODO: DRY
+    function getAllwebElements(ignoreList) {
+        let webElements = [];
+        ignoreList = ignoreList ? ignoreList : [];
+        RED.nodes.eachConfig((n) => {
+            if (n.type == 'web-element' && !(ignoreList.includes(n.id))) {
+                webElements.push(n);
+            }
+        });
+        return webElements;
+    }
+//TODO: DRY
+    function getSimilarElement(elementConfig, elementId) {
+        console.log('PageConfig %j', elementConfig);
+        return getAllwebElements([elementId]).find(element => {
+            console.log('page', element);
+            return fastDeepEqual(elementConfig, {expression: element.expression});
+            //, framePath, markers, name
+        });
+    }
+//TODO: DRY
+    window.Parsley.addValidator('nameUniqueel', {
+        validateString: function(value, propName, options) {
+            console.log(arguments);
+            console.log('Checking ', value, ' to be a unique ', propName);
+            return getAllwebElements([options.element.id]).find(element => element.name === value) === undefined;
+            // names.split(',').find(value => value === name);
+        },
+        requirementType: {
+            '': 'string',
+            'page': 'object',
+            'element': 'object',
+            'validator': 'string',
+        },
+        messages: {
+            en: '%s should be unique'
+        }
+    });
+    //TODO: DRY
+            const webUtils = require('WebNodeUtils').instance;
+            const fastDeepEqual = require('fast-deep-equal');
+    window.finderActive = false;
+    RED.nodes.registerType('web-element', {
+        category: 'config',
+        defaults: {
+            name: {
+                value: "",
+                 validate: function(value) {console.log('V:Name %s', this.name); $('#node-config-input-name').attr('data-parsley-name-uniqueel-element', JSON.stringify({id: this.id})); return $('#node-config-input-name').parsley().validate() === true;}
+            },
+            expression: {
+                value: "",
+               validate: function(value) {
+                    console.log('V:URL %s', this.name); let exprElm = $('#node-config-input-expression'); exprElm.val(exprElm.val().trim()); return $('#node-config-input-expression').parsley().validate() === true;
+                }
+            },
+            selector: {
+                value: "id",
+                required: true
+            },
+            framePath: {
+                value: "Main Frame",
+                required: true
+            },
+            page: {
+                type: 'web-page',
+                required: true
+            },
+            sessionId: {
+                value: "",
+                required: true
+            }
+        },
+        label: function () {
+            return (this.name ? this.name : "body");
+        },
+        oneditprepare: async function () {
+                const Services = require('ServiceManager');
+ 
+            var tabs = RED.tabs.create({
+                id: "node-config-web-element-tabs",
+                onchange: function (tab) {
+                    $("#node-config-web-element-tabs-content").children().hide();
+                    $("#" + tab.id).show();
+                }
+            });
+            tabs.addTab({
+                id: "web-element-tab-elements",
+                label: this.name ? this.name : "Page Elements"
+            });
+            var node = this;
+            console.log(node);
+            console.log(node._def);
+            if(node._def.callerContext){
+                console.log('callerContext:', node._def.callerContext);
+                $('#node-config-input-page').val(node._def.callerContext);
+            }else{
+                console.log('NO-callerContext');
+            }
+
+            
+            // console.log('Elements: Requiring Service Manager');
+
+            // console.log('Invoking createRemoteService');
+            //TODO: DRY
+            async function initFinderConnection() {
+                if (window.backendElement === undefined) {
+                    window.backendElement = await Services.serviceManager.setEndpoint(window.location.hostname).createRemoteService('FinderPluginSvc');
+                    console.log('Created');
+                }
+                window.backendElement.on('ObjectFound', result => {
+                    let resData = result ? result.data : result;
+                    console.log('Element:Got Data');
+                    console.log('Element:DATA:%j', resData);
+                    if (resData && resData.target && resData.target.xpath) {
+                           console.log('Got Result with element, Checking Similarity');
+                        let elementExpr = resData.target.xpath.trim();
+                        let similarElement = getSimilarElement({expression: elementExpr},
+                         node.id);
+                        let containerPage = RED.nodes.node($('#node-config-input-page').val());
+                        console.log(resData.url, ' vs ', containerPage.url);
+                        if (webUtils.getUrlParts(resData.url).path !== containerPage.url) {
+
+                            let urlWoQuery = webUtils.getUrlParts(resData.url).path;
+
+                            $('#errPageMismatch div.msg').html('<code>' + urlWoQuery + '</code> <br/>is not current page url <br/><code>' + containerPage.url + '</code>');
+
+                            $('#errPageMismatch div.controls').html('<button id="addHereBtn" class="btn btn-default">Add Element here</button> <button id="addNewPageBtn" class="btn btn-default">Add New Page</button>');
+
+                            $('#addNewPageBtn').click(() => {
+                                console.log('addNewPage');
+                                $('#node-config-input-page option[value=_ADD_]').attr('editContext', urlWoQuery);
+                                $('#node-config-input-page').val('_ADD_');
+                                $('#node-config-input-lookup-page').click();
+                                // RED.editor.editConfig("", 'web-page', '_ADD_');
+                                $('#errPageMismatch').addClass('hidden');
+                                //TODO: DO we need to blacnk what's already present ?
+                                // $('#node-config-input-url').val('');
+                                // $('#node-config-input-url').parsley().validate();
+                            });
+
+                            $('#addHereBtn').click(() => {
+                                console.log('addHere');
+                                $('#errPageMismatch').addClass('hidden');
+                                $('#node-config-input-expression').val(elementExpr);
+                                $('#node-config-input-expression').parsley().validate();
+                            });
+                            $('#errPageMismatch').removeClass('hidden');
+                        } else if(similarElement){
+                            console.log('Found Similar Element');
+                            console.log(similarElement);
+                            let seName = similarElement.name ? similarElement.name : "UNNAMED";
+                            $('#errExistingElement div.msg').html('<code>' + elementExpr + '</code> is the same as <code>' + seName + '</code>');
+                            $('#errExistingElement div.controls').html('<button id="editExistingElement" class="btn btn-default">Edit ' + seName + '</button> <button id="continueAddingElement" class="btn btn-default">Add as New</button>');
+
+                            $('#editExistingElement').click(() => {
+                                console.log('similarElement', similarElement);
+                                RED.editor.editConfig(similarElement.name, similarElement.type, similarElement.id);
+                                $('#errExistingElement').addClass('hidden');
+                                //TODO: DO we need to blacnk what's already present ?
+                                $('#node-config-input-expression').val('');
+                                $('#node-config-input-expression').parsley().validate();
+                            });
+
+                            $('#continueAddingElement').click(() => {
+                                console.log('NotEditing', similarElement);
+                                $('#errExistingElement').addClass('hidden');
+                                $('#node-config-input-expression').val(elementExpr);
+                                $('#node-config-input-selector').val('xpath');
+                                $('#node-config-input-expression').parsley().validate();
+
+                            });
+
+                            $('#errExistingElement').removeClass('hidden');
+                        } else {
+                            console.log('noSimilarElement')
+                            $('#node-config-input-expression').val(elementExpr);
+                            $('#node-config-input-expression').parsley().validate();
+                        }
+
+                    }else{
+                         console.log('No Data from finder or invalid element expression');
+                    }
+                    // $('#node-config-input-expression').val(resData.target.xpath);
+                    // $('#node-config-input-selector').val('xpath');
+                    if (resData.target.framePath && resData.target.framePath.length > 0) {
+                        $('#node-config-input-framePath').val(resData.target.framePath);
+                    }
+                });
+                return Promise.resolve();
+            };
+//TODO: DRY
+            await initFinderConnection();
+            if (window.sessionId !== undefined) {
+                $('#node-config-input-sessionId').val(window.sessionId);
+            }
+            window.finderActive = false;
+
+            var errCount = 0;
+            async function activateFinder(pageObj) {
+
+                await window.backendElement.send('connectToBrowser', { sessionId: window.sessionId, url: pageObj.NOurl }).then(async (res) => {
+                    console.log('connectToBrowser Response : %j', res);
+                    if (res) {
+                        console.log('errCount %s', errCount)
+                        if (res.error) {
+                            errCount++;
+                            window.sessionId = undefined;
+                            if (res.error.indexOf('connectToBrowser: Could not look up object with id') !== -1) {
+                                window.backendElement.dispose();
+                                delete window.backendElement;
+                                console.log('Re-initializing');
+                                await initFinderConnection();
+                            }
+
+                            if (errCount < 10) {
+                                await activateFinder(pageObj);
+                                return;
+                            } else {
+                                return Promise.reject('Launch failed: ' + res.error);
+                            }
+                        }
+                    } else {
+                        console.log('FIXME:Invalid Scenario')
+                    }
+                    window.sessionId = res.sessionId;
+                    $('#node-config-input-sessionId').val(window.sessionId);
+                    try {
+                        window.finderActive = true;
+                        var startFinderOk = await window.backendElement.send('startFinder', { sessionId: window.sessionId });
+                        console.log('startFinderOk %s', startFinderOk);
+                        $('#plugin-command-obj-finder i').removeClass().addClass('fa fa-stop').css('color', '#960808');
+                    } catch (ex) {
+                        console.log('Error in remote start');
+                        $('#plugin-command-obj-finder i').removeClass().addClass('fa fa-crosshairs').css('color', '#888');
+                        console.log(ex);
+                    }
+                });
+                return Promise.resolve(window.finderActive);
+            }
+
+            $('#plugin-command-obj-finder').on('click.objFinderPugin', async clickEvt => {
+                console.log('Clicked Finder');
+
+                const selectedPage = $('#node-config-input-page').val();
+                console.log('Page change ' + selectedPage);
+                const pageObj = RED.nodes.node(selectedPage);
+                if (!window.finderActive) {
+                    $('#plugin-command-obj-finder i').removeClass().addClass('fa fa-spinner fa-pulse fa-fw');
+                    await activateFinder(pageObj);
+                } else {
+                    try {
+                        window.finderActive = false;
+                        var stopFinderOk = await window.backendElement.send('stopFinder', { sessionId: window.sessionId });
+                        console.log('stopFinderOk %s', stopFinderOk);
+                        $('#plugin-command-obj-finder i').removeClass().addClass('fa fa-search').css('color', '#43a047');
+                    } catch (ex) {
+                        console.log('Elements: Error in remote stop');
+                        console.log(ex);
+                    }
+                }
+
+            });
+            $('#node-config-input-name').parsley().options.nameUniqueelElement = JSON.stringify({id: node.id});
+            $('#node-config-input-name').attr('data-parsley-name-uniqueel-element', JSON.stringify({id: node.id}));
+            $('#node-config-input-expression').parsley();
+            setTimeout(function () {
+                tabs.resize();
+            }, 0);
+        },
+        oneditsave: async function () {
+            var fp = $("node-config-input-framePath");
+            if ($(fp).val() == "") {
+                this.framePath = "'Main Frame";
+            }
+            try {
+                window.finderActive = false;
+                var stopFinderOk = await window.backendElement.send('stopFinder', { sessionId: window.sessionId });
+                console.log('Element OnSave: stopFinderOk %s', stopFinderOk);
+            } catch (ex) {
+                console.log('Page OnSave: Error in remote stop');
+                console.log(ex);
+            }
+        }
+    });
+
+</script>

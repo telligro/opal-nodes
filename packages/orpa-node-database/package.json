@@ -1,0 +1,41 @@
+{
+	"name": "@torpadev/orpa-node-database",
+	"version": "0.1.3",
+	"description": "Database Read/Write nodes for OPAL",
+	"dependencies": {
+		"check-types": ">=7.3.0",
+		"fs-extra": ">=4.0.2",
+		"is-utf8": ">=0.2.1",
+		"mysql": "^2.13.0",
+		"q": ">=1.5.0",
+		"verror": "^1.10.0"
+	},
+	"license": "GPL-3.0",
+	"keywords": [
+		"node-red",
+		"database"
+	],
+	"node-red": {
+		"nodes": {
+			"dbprocess": "dbprocess.js"
+		}
+	},
+	"engines": {
+		"node": ">= 6.9.0"
+	},
+	"author": {
+		"name": "Balaraman Kunduvara",
+		"email": "balaraman@gmail.com"
+	},
+	"devDependencies": {
+		"eslint": "^4.11.0",
+		"eslint-config-google": "^0.9.1",
+		"gulp": "^3.9.1",
+		"gulp-eslint": "^4.0.0",
+		"gulp-eslint-threshold": "^0.1.1",
+		"gulp-if": "^2.0.2"
+	},
+	"scripts": {
+		"lint": "gulp lint"
+	}
+}

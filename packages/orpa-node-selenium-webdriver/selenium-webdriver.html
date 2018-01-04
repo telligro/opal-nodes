@@ -1,0 +1,1807 @@
+
+<link rel="stylesheet" href="vendor/css/bootstrap-select.min.css">
+<!-- Latest compiled and minified JavaScript -->
+<script src="vendor/js/bootstrap-select.min.js"></script>
+<script type="text/javascript" src="vendor/parsley.min.js"></script>
+<link rel="stylesheet" href="vendor/parsley.css">
+<script type="text/x-red" data-template-name="open-web">
+	 <div class="bs-callout bs-callout-warning hidden">
+  <h5>Invalid:</h5>
+  <p></p>
+</div>
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
+		<input type="text" id="node-input-name">
+	</div>
+	<div class="form-row">
+        <label for="node-input-browser"><i class="fa fa-empire"></i> <span>Browser</span></label>
+        <select id="node-input-browser" style="width:125px !important">
+            <option value="chrome">Chrome</option>
+            <option value="firefox">Firefox</option>
+            <option value="safari">Safari</option>
+            <option value="opera">Opera</option>
+            <option value="ie">IE</option>
+        </select>
+	</div>
+		<div class="form-row">
+		<label for="node-input-page"><i class="fa fa-crosshairs"></i> <span>Page</span></label>
+		<input type="text" id="node-input-page">
+	</div>
+	<!-- <div class="form-row">
+		<label for="node-input-weburl"><i class="fa fa-empire"></i> <span>Web URL</span></label>
+		<input type="text" id="node-input-weburl">
+	</div>
+	<div class="form-row">
+		<label for="node-input-width"><i class="fa fa-empire"></i> <span>Width</span></label>
+		<input type="text" id="node-input-width" value="1024">
+	</div>
+	<div class="form-row">
+		<label for="node-input-height"><i class="fa fa-empire"></i> <span>Height</span></label>
+		<input type="text" id="node-input-height" value="768">
+	</div>
+	<div class="form-row">
+		<label for="node-input-webtitle"><i class="fa fa-empire"></i> <span>Web Title</span></label>
+		<input type="text" id="node-input-webtitle">
+	</div> -->
+	<div class="form-row">
+		<label for="node-input-timeout"><i class="fa fa-empire"></i> <span>Timeout</span></label>
+		<input type="text" id="node-input-timeout" value="1000">
+	</div>
+	<div class="form-row">
+		<input type="checkbox" id="node-input-maximized" checked style="display: inline-block; width: auto; vertical-align: top;">
+		<label for="node-input-maximized" style="width: auto;">Maximize window</label>
+	</div>
+</script>
+
+<script type="text/x-red" data-help-name="open-web">
+	<p>Create an instance of selenium webdriver and connect to the Selenium Server when an event is triggered.</p>
+	<strong>Inputs:</strong>
+	<p><ul>
+	    <li><a>Browser</a>: specify the selenium node which support the web browser you wan tot test such as [Chrome, Firefox etc.,]</li>
+		<!-- <li><a>Server</a>: specify the selenium server configuration. It could be localhost or remote Selenium Server.</li> -->
+		<!-- <li><a>Web URL</a>: specify the web page to start browsing the targeted application for your test.</li> -->
+		<!-- <li><a>Web Title</a>: specify the expected title to compare if set. Otherwise this node will bypass the sanity check operation.</li> -->
+		<li><a>Web Page</a>: select a page that is defiined from the web-page configuration node</li>
+		<li><a>Timeout</a>: specify the timeout during lookup for the title operation.</li>
+	</ul></p>
+	<strong>Outputs:</strong>
+	<p><code>msg.error</code> When the title is unexpected or cannot find element, this node generates the error with detail information</p>
+	<p><code>msg.driver</code> Always pass webdriver object to the next node for ad-hoc function code.</p>
+	<p><code>msg.element</code> If the element is found, it will be passed though the msg object to the next node.</p>
+	<p><code>msg.payload</code> contains the title of the opened web page. This payload value will be used to compare with the expected Web Title value if that value is set.</p>
+</script>
+
+<script type="text/javascript">
+	//FIXME: Move this helper to a generic RED.utils like location so that it can be used across nodes
+	function makeTypedInputFields(inpList) {
+		console.log('makeTypedInputFields')
+		inpList.forEach((inpItem) => {
+			console.log('TI:%s-%s-%s-%s', inpItem.name, inpItem.type, inpItem.valid.toString(), inpItem.inst);
+			var inpId = "#node-input-" + inpItem.name;
+			var inpTypeId = "#node-input-" + inpItem.type;
+
+			$(inpTypeId).val(inpItem.inst);
+			$(inpId).typedInput({
+				default: inpItem.default,
+				typeField: $(inpTypeId),
+				types: [...inpItem.valid]
+			});
+			$(inpId).typedInput('type', inpItem.inst);
+		});
+	}
+
+	function addStyledPageList(){
+		console.log($('#node-input-page').prop('outerHTML'));
+		$('#node-input-page option').each((i, e) => {
+			// console.log('Adding %s', $(e).val());
+			if ($(e).val() !== '_ADD_') {
+				const pageObj = RED.nodes.node($(e).val());
+				$(e).data('subtext', pageObj.url);
+			}
+
+		});
+
+		let style = 'btn-infox';
+		
+		if($('#node-input-page').hasClass('input-error')){
+			console.log('Is Invalid');
+			// style = 'btn-danger';
+			$('#node-input-page').siblings('button').addClass('input-error');
+			// $('#node-input-page').selectpicker('setStyle', 'btn-danger', 'add');
+			// $('#node-input-page').selectpicker('setStyle', 'btn-infox', 'remove');
+		}else{
+			console.log('Is Valid now');
+			$('#node-input-page').siblings('button').removeClass('input-error');
+			// $('#node-input-page').selectpicker('setStyle', 'btn-danger', 'remove');
+			// $('#node-input-page').selectpicker('setStyle', 'btn-infox', 'add');
+		
+		}
+
+		$('#node-input-page').selectpicker({
+			size: 5,
+			liveSearch: true,
+			width: '100%'
+		});
+
+		$('#node-input-page').selectpicker('refresh');
+		$('#node-input-page').selectpicker('render');
+	}
+	RED.nodes.registerType('open-web', {
+		category : 'Browser',
+		defaults : {
+			name : {
+				value : ""
+			},
+            browser : {
+                value : "chrome",
+                required : true
+            },
+			page : {
+                type : 'web-page',
+                required : true
+            },
+			timeout : {
+				value : 3000,
+				required : true,
+				validate : RED.validators.number()
+			},
+			maximized : {
+				value : false,
+				required : true
+			}
+		},
+		color : "#d8bfd8",
+		inputs : 1,
+		outputs : 1,
+		icon : "white-globe.png",
+		label : function() {
+			return this.name || this.topic || "Open URL";
+		},
+		labelStyle : function() {
+			return this.name ? "node_label_italic" : "";
+		}, oneditprepare: function() {
+			$('#node-input-page').change(()=>{
+				addStyledPageList();
+			})
+			addStyledPageList();
+
+			// $("#node-input-page").bind("DOMSubtreeModified", function(e) {
+			// 	console.log("tree changed");
+			// 	console.log(e)
+			// 	addStyledPageList();
+			// });
+		}
+	}); 
+</script>
+
+<script type="text/x-red" data-template-name="close-web">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
+		<input type="text" id="node-input-name">
+	</div>
+	<div class="form-row">
+		<label for="node-input-waitfor"><i class="fa fa-empire"></i> <span>Wait For</span></label>
+		<input type="text" id="node-input-waitfor" value="00">
+	</div>
+</script>
+
+<script type="text/x-red" data-help-name="close-web">
+	<p>Close the web browser which is openned by the open-web node and finalize the selenium session.</p>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('close-web', {
+		category : 'Browser',
+		defaults : {
+			name : {
+				value : ""
+			}, 
+			waitfor : {
+				value : 500,
+				validate : RED.validators.number()
+			}
+		},
+		color : "#d8bfd8",
+		inputs : 1,
+		outputs : 1,
+		icon : "white-globe.png",
+		label : function() {
+			return this.name || "Close";
+		},
+		labelStyle : function() {
+			return this.name ? "node_label_italic" : "";
+		}
+	}); 
+</script>
+
+<script type="text/x-red" data-template-name="find-object">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
+		<input type="text" id="node-input-name">
+	</div>
+	<!-- <div class="form-row">
+	<label for="node-input-selector"><i class="fa fa-empire"></i> <span>By</span></label>
+		<select id="node-input-selector" style="width:125px !important">
+			<option value="id">id</option>
+			<option value="name">name</option>
+			<option value="link">link</option>
+			<option value="xpath">xpath</option>
+			<option value="tagName">tagName</option>
+			<option value="className">className</option>
+			<option value="linkText">linkText</option>
+			<option value="cssSelector">cssSelector</option>
+		</select>
+	</div>
+	<div class="form-row">
+		<label for="node-input-target"><i class="fa fa-empire"></i> <span>Target</span></label>
+		<input type="text" id="node-input-target">
+	</div> -->
+	<div class="form-row">
+		<label for="node-input-page"><i class="fa fa-file"></i> <span>Page</span></label>
+		<input type="text" id="node-input-page">
+	</div>
+	<div class="form-row">
+		<label for="node-input-target"><i class="fa fa-crosshairs"></i> <span>Target</span></label>
+		 <input type="text" id="node-input-target"> 
+		<!-- <select id="node-input-target">
+		</select> -->
+		<input type="hidden" id="node-input-selector" style="display: inline-block;">
+	</div>
+	<div class="form-row">
+		<label for="node-input-timeout"><i class="fa fa-empire"></i> <span>Timeout</span></label>
+		<input type="text" id="node-input-timeout" value="1000">
+	</div>
+	<div class="form-row">
+		<label for="node-input-waitfor"><i class="fa fa-empire"></i> <span>Wait For</span></label>
+		<input type="text" id="node-input-waitfor" value="00">
+	</div>
+</script>
+
+<script type="text/x-red" data-help-name="find-object">
+	<p>Find an object or element by using selenium webdriver <code>findElement()</code>.</p>
+	<strong>Inputs:</strong>
+	<p><ul>
+		<li><a>By</a>: specify the way to find an element by selector. The <code>msg.selector</code> will override the <code>By</code> field if set.</li>
+		<li><a>Target</a>: specify the selector's value to lookup. The<code>msg.target</code> will override the <code>Target</code> field if set.</li>
+		<li><a>Timeout</a>: specify the timeout during lookup operation. The <code>msg.timeout</code> will override the <code>Timeout</code> field if set.</li>
+		<li><a>Wait For</a>: specify the time to wait before looing up. The <code>msg.waitfor</code> will override the <code>Wait For</code> field if set.</li>
+	</ul></p>
+	<strong>Outputs:</strong>
+	<p><code>msg.error</code> When the object is unexpected or cannot find element, this node generates the error with detail information</p>
+	<p><code>msg.element</code> If the element is found, it will be passed though the msg object to the next node.</p>
+</script>
+
+<script type="text/javascript">
+	RED.customUtil = RED.customUtil === undefined ? {} : RED.customUtil;
+	RED.customUtil.handleWebPageChange = function (e, page_, target_) {
+		console.log(e);
+		console.log(this.value);
+		const selectedPage = (e !== undefined && e !== null) ? $(e.target).val() : page_;
+		console.log('Page change ' + selectedPage + ' T:' + target_);
+		const pageObj = RED.nodes.node(selectedPage);
+		console.log('page')
+		console.log(pageObj);
+		const elementListElm = $('#node-input-target');
+		let elementOptions = '';
+		$(elementListElm).children().remove();
+		//FIXME: Added better checks for valid pageObj
+		if (pageObj === undefined || pageObj === null || pageObj.elements.length == 0) {
+			//FIXME: Validate on save
+			//elementOptions = '<option value=0>No Elements</option>';
+		} else {
+			pageObj.elements.forEach((element) => {
+				if (element.name.length > 0)
+					elementOptions += '<option selector=' + element.selector + ' value=' + element.expression + '>' + element.name + ' > by' + element.selector + ' : ' + element.expression + '</option>';
+			});
+		}
+
+		if (elementOptions !== undefined) {
+			$(elementListElm).append(elementOptions);
+		}
+
+		//Will attempt to set the original value that was selected before page selection change
+		if(target_ !== undefined)
+		 	$(elementListElm).val(target_);
+	}
+	RED.customUtil.updatePage = function(target){
+		console.log('Current Target is', target);
+		let targetNode = RED.nodes.node(target);
+		console.log('TargetNodeName:', targetNode.name, ', TPageNodeID:', targetNode.page, ', CPageNodeID:', $('#node-input-page').val());
+		let currentPage = $('#node-input-page').val();
+		if(targetNode.page !== currentPage){
+			let pageNode = RED.nodes.node(targetNode.page);
+			$('#node-input-page').empty();
+			RED.nodes.eachConfig((n) => {
+				if (n.type === 'web-page') {
+					console.log('Added Page %s', n.name);
+					$('#node-input-page').append($('<option>').val(n.id).text(n.name));
+				}
+				// console.log(n.name + ":" + n.type + ":" + n.id);
+			});
+			$('#node-input-page').append($('<option>').val("_ADD_").text("Add new web-element..."))
+			console.log('Updating PageNode:', pageNode.name);
+			$('#node-input-page').val(targetNode.page);
+			
+			console.log('Current PageNode:', $('#node-input-page').val(), ':', $('#node-input-page').text());
+			return true;
+		}
+		return false;
+	}
+	RED.customUtil.filterTargetForPage = function (node, target) {
+		var thisPageElements = [];
+		var spage = $('#node-input-page').val();
+		console.log('Filter: Selected Page %s / %s', node.page, spage);
+		$('#node-input-target').empty();
+		RED.nodes.eachConfig((n) => {
+			if (n.type === 'web-element' && n.page === spage) {
+				console.log('Added %s.%s.%s', n.name, n.page, spage);
+				$('#node-input-target').append($('<option>').val(n.id).text(n.name)).attr('editContext', n.page);
+			}
+			// console.log(n.name + ":" + n.type + ":" + n.id);
+		});
+		$('#node-input-target').append($('<option>').val("_ADD_").text("Add new web-element..."))
+		$('#node-input-target option[value="_ADD_"]').attr('editContext', spage);
+		// console.log($('#node-input-target option[value="_ADD_"]'))
+		if(target === undefined){
+			target = node.target;
+		}
+		console.log('Current target[%s]', target);
+		$('#node-input-target').val(target);
+
+		if($('#node-input-target').val()===null){
+			$('#node-input-target').val('_ADD_');
+			// $('#node-input-target').prop('selectedIndex', 0);
+		}
+	}
+
+	RED.customUtil.handleTargetUpdate = function (that){
+			that.allTargets = RED.customUtil.getAllTargets();
+			/**
+			 * FIXME: Based on editor/ui/js/edtior.js an change() event is trigered. 
+			 * If this behaviour is altered, the below logic maynot apply
+			 */
+			$("#node-input-target").change(function (e) {
+				console.log(e);
+				console.log("Changed " + $(e.target).val());
+				console.log(that.allTargets)
+				console.log(RED.customUtil.getAllTargets())
+				if (!RED.customUtil.objIsEqual(that.allTargets, RED.customUtil.getAllTargets())) {
+					console.log('NotEqual');
+					if(!RED.customUtil.updatePage($(e.target).val())){
+						console.log('Page Not Updated')
+						// RED.customUtil.filterTargetForPage(that, $(e.target).val());
+						// that.allTargets = RED.customUtil.getAllTargets();
+						
+					}else{
+						//$('#node-input-page').change();
+						addStyledPageList();
+						console.log('Page Updated')
+					}
+					RED.customUtil.filterTargetForPage(that, $(e.target).val());
+					that.allTargets = RED.customUtil.getAllTargets();
+					return;
+				}
+				console.log('Equal');
+				//e.preventDefault();
+			});
+			// console.log('Type: %s', this.type);
+			RED.customUtil.filterTargetForPage(that);
+			$('#node-input-page').change((e) => {
+				console.log('Handling Page change', $(e.target).val());	
+				RED.customUtil.filterTargetForPage(that);
+				that.allTargets = RED.customUtil.getAllTargets();
+				addStyledPageList();
+			});
+	}
+
+	RED.customUtil.objIsEqual = (function () {
+		function isObject(o) {
+			return o !== null && typeof o === 'object';
+		}
+		return function (o1, o2) {
+			if (!isObject(o1) || !isObject(o2)) return o1 === o2;
+			var key, allKeys = {};
+			for (key in o1)
+				if (o1.hasOwnProperty(key))
+					allKeys[key] = key;
+			for (key in o2)
+				if (o2.hasOwnProperty(key))
+					allKeys[key] = key;
+			for (key in allKeys) {
+				if (!RED.customUtil.objIsEqual(o1[key], o2[key])) {
+					console.log('Mismatch  o1[%s]:%s === o2[%s]:%s', key, o1[key], key, o2[key])
+					return false;
+				}
+			}
+			return true;
+		}
+	})();
+	RED.customUtil.getAllTargets = function getAllTargets() {
+		var allTargets = {}
+		$('#node-input-target option').each((i, op) => {
+			allTargets[op.value] = op.text;
+			// console.log(op);
+		});
+		// console.log(allTargets);
+		return allTargets;
+	}
+
+
+	RED.nodes.registerType('find-object', {
+		category : 'Browser',
+		defaults : {
+			name : {
+				value : ""
+			},
+			page: {
+				type: 'web-page',
+				required: true
+			},
+			target: {
+				type: 'web-element',
+				required: true
+			},
+			selector: {
+				value: "",
+				required: false
+			},
+			timeout : {
+				value : 1000,
+				required : true,
+				validate : RED.validators.number()
+			}, 
+			waitfor : {
+				value : 500,
+				validate : RED.validators.number()
+			}
+		}, 
+		color : "#d8bfd8",
+		inputs : 1,
+		outputs : 1,
+		icon : "debug.png",
+		label : function() {
+			return this.name || "Find Element";
+		},
+		labelStyle : function() {
+			return this.name ? "node_label_italic" : "";
+		},
+		oneditprepare: function () {
+			console.log('oneditprepare1 %s', this.target);
+			const that = this;
+			RED.customUtil.handleTargetUpdate(that);
+			console.log('oneditprepare2 %s', this.target);
+		},
+		oneditsave:function(){
+			console.log('oneditsave %s',this.target);
+		}
+	}); 
+</script>
+
+<script type="text/x-red" data-template-name="send-keys">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
+		<input type="text" id="node-input-name">
+	</div>
+	<div class="form-row">
+		<label for="node-input-text"><i class="fa fa-empire"></i> <span>Value</span></label>
+		<input type="text" id="node-input-text">
+		<input type="hidden" id="node-input-textType">
+		<!-- <input type="text" id="node-input-repeat" placeholder="repeat count"  style="display: inline-block; width: 13%; vertical-align: top;">-->
+		<!-- <label for="node-input-repeat" style="display: inline-block; width=60px;"><span>times</span></label> --> 
+	</div>
+	<div class="form-row">
+		<label for="node-input-page"><i class="fa fa-file"></i> <span>Page</span></label>
+		<input type="text" id="node-input-page">
+	</div>
+	<div class="form-row">
+		<label for="node-input-target"><i class="fa fa-crosshairs"></i> <span>Target</span></label>
+		 <input type="text" id="node-input-target"> 
+		<!-- <select id="node-input-target">
+		</select> -->
+		<input type="hidden" id="node-input-selector" style="display: inline-block;">
+	</div>
+	<div class="form-row">
+		<label for="node-input-timeout"><i class="fa fa-empire"></i> <span>Timeout</span></label>
+		<input type="text" id="node-input-timeout" value="1000">
+	</div>
+	<div class="form-row">
+		<label for="node-input-waitfor"><i class="fa fa-empire"></i> <span>Wait For</span></label>
+		<input type="text" id="node-input-waitfor" value="00">
+	</div>
+	<div class="form-row">
+		<label for="node-input-repeat"><i class="fa fa-file"></i> <span>Repeat</span></label>
+		<input type="text" id="node-input-repeat">
+		<!-- <label for="node-input-repeat" style="display: inline-block; width: auto; vertical-align: top;"><i class="fa fa-file"></i> <span>times</span></label> -->
+	</div>
+	<div class="form-row">		
+		<input type="checkbox" id="node-input-clearval" value="false" style="display: inline-block; width: auto; vertical-align: top;">
+		<label for="node-input-clearval" style="width: 70%"> <span>Clear the element value before sending the keys.</span></label>
+	</div>
+</script>
+
+<script type="text/x-red" data-help-name="send-keys">
+	<p>Send keyboard keys to the <code>msg.element</code> from previous node or after waiting for the expected element is located.</p>
+	<strong>Inputs:</strong>
+	<p><ul>
+		<li><a>Value</a>: specify the value to get. The <code>msg.value</code> will override the <code>Value</code> field if set.</li>
+		<li><a>By</a>: specify the way to find an element by selector. The <code>msg.selector</code> will override the <code>By</code> field if set.</li>
+		<li><a>Target</a>: specify the selector's value to lookup. The<code>msg.target</code> will override the <code>Target</code> field if set.</li>
+		<li><a>Timeout</a>: specify the timeout during lookup operation. The <code>msg.timeout</code> will override the <code>Timeout</code> field if set.</li>
+		<li><a>Wait For</a>: specify the time to wait before looing up. The <code>msg.waitfor</code> will override the <code>Wait For</code> field if set.</li>
+	</ul></p>	
+	<strong>Outputs:</strong>
+	<p><code>msg.error</code> When the object is unexpected or cannot find element, this node generates the error with detail information</p>
+	<p><code>msg.element</code> If the element is found, it will be passed though the msg object to the next node.</p>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('send-keys', {
+		category : 'Browser',
+		defaults : {
+			name : {
+				value : ""
+			},
+			text: { value: "", validate: RED.validators.typedInput("textType") },
+			textType: { value: "str" },
+			repeat : {
+				value:1,
+				required:false,
+				validate : RED.validators.number()
+			},
+			page: {
+				type: 'web-page',
+				required: true
+			},
+			target: {
+				type: 'web-element',
+				required: true
+			},
+			selector: {
+				value: "",
+				required: false
+			},
+			timeout : {
+				value : 1000,
+				validate : RED.validators.number()
+			},
+			waitfor : {
+				value : 500,
+				validate : RED.validators.number()
+			},
+			clearval : {
+				value : false
+			}
+		},
+		color : "#d8bfd8",
+		inputs : 1,
+		outputs : 1,
+		icon : "debug.png",
+		label : function() {
+			return this.name || "Send Keys";
+		},
+		labelStyle : function() {
+			return this.name ? "node_label_italic" : "";
+		},
+		oneditprepare: function () {
+
+			makeTypedInputFields([
+				{ name: 'text', type: 'textType', valid: ['msg', 'global', 'flow', 'str'], inst: this.textType, default: 'str' }
+			]);
+			
+			console.log('oneditprepare1 %s', this.target);
+			const that = this;
+			RED.customUtil.handleTargetUpdate(that);
+			
+			console.log('oneditprepare2 %s', this.target);
+		},
+		oneditsave:function(){
+			console.log('oneditsave %s',this.target);
+			var repeat = $('#node-input-repeat');
+			if($(repeat).val()===''){
+				this.repeat = 1;
+			}
+		}
+	}); 
+</script>
+
+<script type="text/x-red" data-template-name="click-on">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
+		<input type="text" id="node-input-name">
+	</div>
+	</div>
+	<div class="form-row">
+		<label for="node-input-page"><i class="fa fa-file"></i> <span>Page</span></label>
+		<input type="text" id="node-input-page">
+	</div>
+	<div class="form-row">
+		<label for="node-input-target"><i class="fa fa-crosshairs"></i> <span>Target</span></label>
+		 <input type="text" id="node-input-target"> 
+		<!-- <select id="node-input-target">
+		</select> -->
+		<input type="hidden" id="node-input-selector" style="display: inline-block;">
+	</div>
+	<div class="form-row">
+		<label for="node-input-timeout"><i class="fa fa-empire"></i> <span>Timeout</span></label>
+		<input type="text" id="node-input-timeout" value="1000">
+	</div>
+	<div class="form-row">
+		<label for="node-input-waitfor"><i class="fa fa-empire"></i> <span>Wait For</span></label>
+		<input type="text" id="node-input-waitfor" value="00">
+	</div>
+	<div class="form-row">		
+		<input type="checkbox" id="node-input-clickon" style="display: inline-block; width: auto; vertical-align: top;">
+		<label for="node-input-clickon" style="width: 70%"> <span>Require manual approval on click to continue</span></label>
+	</div>
+</script>
+
+<script type="text/x-red" data-help-name="click-on">
+	<p>Click on the <code>msg.element</code> which is passed by previous node or after waiting for the expected element is located.</p>
+	<strong>Inputs:</strong>
+	<p><ul>
+		<li><a>By</a>: specify the way to find an element by selector. The <code>msg.selector</code> will override the <code>By</code> field if set.</li>
+		<li><a>Target</a>: specify the selector's value to lookup. The<code>msg.target</code> will override the <code>Target</code> field if set.</li>
+		<li><a>Timeout</a>: specify the timeout during lookup operation. The <code>msg.timeout</code> will override the <code>Timeout</code> field if set.</li>
+		<li><a>Wait For</a>: specify the time to wait before looing up. The <code>msg.waitfor</code> will override the <code>Wait For</code> field if set.</li>
+	</ul></p>	
+	<strong>Outputs:</strong>
+	<p><code>msg.error</code> When the object is unexpected or cannot find element, this node generates the error with detail information</p>
+	<p><code>msg.element</code> If the element is found, it will be passed though the msg object to the next node.</p>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('click-on', {
+		category : 'Browser',
+		defaults : {
+			name : {
+				value : ""
+			},
+			page: {
+				type: 'web-page',
+				required: true
+			},
+			target: {
+				type: 'web-element',
+				required: true
+			},
+			selector: {
+				value: "",
+				required: false
+			},
+			timeout : {
+				value : 1000,
+				validate : RED.validators.number()
+			}, 
+			waitfor : {
+				value : 500,
+				validate : RED.validators.number()
+			},
+			clickon : {
+				value : false
+			}
+		},
+		color : "#d8bfd8",
+		inputs : 1,
+		outputs : 1,
+		icon : "debug.png",
+		label : function() {
+			return this.name || "Click On";
+		},
+		labelStyle : function() {
+			return this.name ? "node_label_italic" : "";
+		},
+		button: {			
+            onclick: function() {
+                var node = this;
+                $.ajax({
+                    url: "onclick/" + this.id,
+                    type:"POST",
+                    success: function(resp) {
+                        RED.notify(node._("inject.success",{ label:label }),"success");
+                    },
+                    error: function(jqXHR,textStatus,errorThrown) {
+                        if (jqXHR.status == 404) {
+                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.not-deployed")}),"error");
+                        } else if (jqXHR.status == 500) {
+                            RED.notify(node._("common.notification.error",{message:node._("inject.errors.failed")}),"error");
+                        } else if (jqXHR.status == 0) {
+                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.no-response")}),"error");
+                        } else {
+                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.unexpected",{status:jqXHR.status,message:textStatus})}),"error");
+                        }
+                    }
+                });
+            }
+		},
+		oneditprepare: function () {
+			console.log('oneditprepare1 %s', this.target);
+			const that = this;
+			RED.customUtil.handleTargetUpdate(that);
+			console.log('oneditprepare2 %s', this.target);
+		},
+		oneditsave:function(){
+			console.log('oneditsave %s',this.target);
+		}
+	}); 
+</script>
+
+<script type="text/x-red" data-template-name="set-value">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
+		<input type="text" id="node-input-name">
+	</div>
+	<div class="form-row">
+		<label for="node-input-text"><i class="fa fa-empire"></i> <span>Value</span></label>
+		<input type="text" id="node-input-text">
+		<input type="hidden" id="node-input-textType">
+	</div>
+	</div>
+	<div class="form-row">
+		<label for="node-input-page"><i class="fa fa-file"></i> <span>Page</span></label>
+		<input type="text" id="node-input-page">
+	</div>
+	<div class="form-row">
+		<label for="node-input-target"><i class="fa fa-crosshairs"></i> <span>Target</span></label>
+		 <input type="text" id="node-input-target"> 
+		<!-- <select id="node-input-target">
+		</select> -->
+		<input type="hidden" id="node-input-selector" style="display: inline-block;">
+	</div>
+	<div class="form-row">
+		<label for="node-input-timeout"><i class="fa fa-empire"></i> <span>Timeout</span></label>
+		<input type="text" id="node-input-timeout" value="1000">
+	</div>
+	<div class="form-row">
+		<label for="node-input-waitfor"><i class="fa fa-empire"></i> <span>Wait For</span></label>
+		<input type="text" id="node-input-waitfor" value="00">
+	</div>
+</script>
+
+<script type="text/x-red" data-help-name="set-value">
+	<p>Set a value to the <code>value</code> attribute of the <code>msg.element</code> or after waiting for the expected element is located.</p>
+	<strong>Inputs:</strong>
+	<p><ul>
+		<li><a>Value</a>: specify the value to get. The <code>msg.value</code> will override the <code>Value</code> field if set.</li>
+		<li><a>By</a>: specify the way to find an element by selector. The <code>msg.selector</code> will override the <code>By</code> field if set.</li>
+		<li><a>Target</a>: specify the selector's value to lookup. The<code>msg.target</code> will override the <code>Target</code> field if set.</li>
+		<li><a>Timeout</a>: specify the timeout during lookup operation. The <code>msg.timeout</code> will override the <code>Timeout</code> field if set.</li>
+		<li><a>Wait For</a>: specify the time to wait before looing up. The <code>msg.waitfor</code> will override the <code>Wait For</code> field if set.</li>
+	</ul></p>	
+	<strong>Outputs:</strong>
+	<p><code>msg.error</code> When the object is unexpected or cannot find element, this node generates the error with detail information</p>
+	<p><code>msg.element</code> If the element is found, it will be passed though the msg object to the next node.</p>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('set-value', {
+		category : 'Browser',
+		defaults : {
+			name : {
+				value : ""
+			},
+			text: { value: "", validate: RED.validators.typedInput("textType") },
+			textType: { value: "str" },
+			page: {
+				type: 'web-page',
+				required: true
+			},
+			target: {
+				type: 'web-element',
+				required: true
+			},
+			selector: {
+				value: "",
+				required: false
+			},
+			timeout : {
+				value : 1000,
+				validate : RED.validators.number()
+			},
+			waitfor : {
+				value : 500,
+				validate : RED.validators.number()
+			}
+		},
+		color : "#d8bfd8",
+		inputs : 1,
+		outputs : 1,
+		icon : "debug.png",
+		label : function() {
+			return this.name || "Set Value";
+		},
+		labelStyle : function() {
+			return this.name ? "node_label_italic" : "";
+		},
+		oneditprepare: function () {
+
+			makeTypedInputFields([
+				{ name: 'text', type: 'textType', valid: ['msg', 'global', 'flow', 'str'], inst: this.textType, default: 'str' }
+			]);
+
+			console.log('oneditprepare1 %s', this.target);
+			const that = this;
+			RED.customUtil.handleTargetUpdate(that);
+			console.log('oneditprepare2 %s', this.target);
+		},
+		oneditsave:function(){
+			console.log('oneditsave %s',this.target);
+		}
+	}); 
+</script>
+
+<script type="text/x-red" data-template-name="to-file">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
+		<input type="text" id="node-input-name">
+	</div>
+	<div class="form-row">
+		<label for="node-input-filename"><i class="fa fa-file"></i> <span>File</span></label>
+		<input type="text" id="node-input-filename">
+		<input type="text" id="node-input-filenameType">
+	</div>	
+	<div class="form-row">
+		<label for="node-input-waitfor"><i class="fa fa-empire"></i> <span>Wait For</span></label>
+		<input type="text" id="node-input-waitfor" value="00">
+	</div>
+</script>
+
+<script type="text/x-red" data-help-name="to-file">
+	<p>Save a value to the <code>File</code> location with <code>msg.payload</code> content as a string.</p>
+	<strong>Inputs:</strong>
+	<p><ul>
+		<li><a>File</a>: specify the file path to write to. The <code>msg.filename</code> will override the <code>File</code> field if set.</li>
+		<li><a>Wait For</a>: specify the time to wait before looing up. The <code>msg.waitfor</code> will override the <code>Wait For</code> field if set.</li>
+	</ul></p>	
+	<strong>Outputs:</strong>
+	<p><code>msg.error</code> When the file writing operation is failed or unexpected operation occurred.</p>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('to-file', {
+		category : 'Browser',
+		defaults : {
+			name : {
+				value : ""
+			},
+			filename: { value: "./filename", validate: RED.validators.typedInput("filenameType") },
+			filenameType: { value: "str" },
+			waitfor : {
+				value : 500,
+				validate : RED.validators.number()
+			}
+		},
+		color : "#d8bfd8",
+		inputs : 1,
+		outputs : 1,
+		icon : "debug.png",
+		label : function() {
+			return this.name || "To File";
+		},
+		labelStyle : function() {
+			return this.name ? "node_label_italic" : "";
+		},
+		oneditprepare: function(){
+			makeTypedInputFields([
+				{ name: 'filename', type: 'filenameType', valid: ['msg', 'global', 'flow', 'str'], inst: this.filenameType, default: 'str' }
+			]);
+		}
+	}); 
+</script>
+<script type="text/x-red" data-template-name="identify-page">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
+		<input type="text" id="node-input-name">
+	</div>
+	
+	</div>
+	<div class="form-row">
+		<label for="node-input-page"><i class="fa fa-file"></i> <span>Page</span></label>
+		<input type="text" id="node-input-page">
+	</div>
+	
+	<div class="form-row">
+		<label for="node-input-timeout"><i class="fa fa-empire"></i> <span>Timeout</span></label>
+		<input type="text" id="node-input-timeout" value="1000">
+	</div>
+	<div class="form-row">
+		<label for="node-input-waitfor"><i class="fa fa-empire"></i> <span>Wait For</span></label>
+		<input type="text" id="node-input-waitfor" value="00">
+	</div>	
+	<!-- <div class="form-row">		
+		<input type="checkbox" id="node-input-savetofile" value="false" style="display: inline-block; width: auto; vertical-align: top;">
+		<label for="node-input-savetofile" style="width: 70%"> <span>Save the value to a specific filename.</span></label>
+	</div> -->
+</script>
+
+<script type="text/x-red" data-help-name="identify-page">
+	<p>Get the value from <code>value</code> attribute of the <code>msg.element</code> or after waiting for the expected element is located.</p>
+	<strong>Inputs:</strong>
+	<p><ul>
+		<li><a>Expected</a>: specify the expected value to compare. The <code>msg.expected</code> will override the <code>Expected</code> field if set.</li>
+		<li><a>By</a>: specify the way to find an element by selector. The <code>msg.selector</code> will override the <code>By</code> field if set.</li>
+		<li><a>Timeout</a>: specify the timeout during lookup operation. The <code>msg.timeout</code> will override the <code>Timeout</code> field if set.</li>
+		<li><a>Wait For</a>: specify the time to wait before looing up. The <code>msg.waitfor</code> will override the <code>Wait For</code> field if set.</li>
+	</ul></p>	
+	<p>If the <code>msg.filename</code> is passed through, the <code>msg.payload</code> will be written into the file path.</p>
+	<strong>Outputs:</strong>
+	<p><code>msg.error</code> When the object is unexpected or cannot find element, this node generates the error with detail information</p>
+	<p><code>msg.element</code> If the element is found, it will be passed though the msg object to the next node.</p>
+	<p><code>msg.payload</code> contains the result of the <code>value</code> attribute.</p>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('identify-page', {
+		category : 'Browser',
+		defaults : {
+			name : {
+				value : ""
+			},
+			page: {
+				type: 'web-page',
+				required: true
+			},
+			timeout : {
+				value : 1000,
+				validate : RED.validators.number()
+			},
+			waitfor : {
+				value : 500,
+				validate : RED.validators.number()
+			},
+			savetofile : {
+				value : false
+			}
+		},
+		color : "#d8bfd8",
+		inputs : 1,
+		outputs : 2,
+		icon : "debug.png",
+		label : function() {
+			return this.name || "Identify";
+		},
+		labelStyle : function() {
+			return this.name ? "node_label_italic" : "";
+		},
+		outputLabels: function(index) {
+			return (index==0) ? 'Identified' : 'Not Identified';
+		 },
+		oneditprepare: function () {
+
+		},
+		oneditsave:function(){
+		}
+	}); 
+</script>
+<script type="text/x-red" data-template-name="get-value">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
+		<input type="text" id="node-input-name">
+	</div>
+	<div class="form-row">
+		<label for="node-input-expected"><i class="fa fa-globe"></i> <span>Expected</span></label>
+		<input type="text" id="node-input-expected">
+	</div>
+	</div>
+	<div class="form-row">
+		<label for="node-input-page"><i class="fa fa-file"></i> <span>Page</span></label>
+		<input type="text" id="node-input-page">
+	</div>
+	<div class="form-row">
+		<label for="node-input-target"><i class="fa fa-crosshairs"></i> <span>Target</span></label>
+		 <input type="text" id="node-input-target"> 
+		<!-- <select id="node-input-target">
+		</select> -->
+		<input type="hidden" id="node-input-selector" style="display: inline-block;">
+	</div>
+	<div class="form-row">
+		<label for="node-input-timeout"><i class="fa fa-empire"></i> <span>Timeout</span></label>
+		<input type="text" id="node-input-timeout" value="1000">
+	</div>
+	<div class="form-row">
+		<label for="node-input-waitfor"><i class="fa fa-empire"></i> <span>Wait For</span></label>
+		<input type="text" id="node-input-waitfor" value="00">
+	</div>
+	<div class="form-row">
+		<label for="node-input-store"><i class="fa fa-empire"></i> <span>Store</span></label>
+		<input type="text" id="node-input-store" style="width:70%" />
+		<input type="hidden" id="node-input-storeType" />
+	</div>	
+	<!-- <div class="form-row">		
+		<input type="checkbox" id="node-input-savetofile" value="false" style="display: inline-block; width: auto; vertical-align: top;">
+		<label for="node-input-savetofile" style="width: 70%"> <span>Save the value to a specific filename.</span></label>
+	</div> -->
+</script>
+
+<script type="text/x-red" data-help-name="get-value">
+	<p>Get the value from <code>value</code> attribute of the <code>msg.element</code> or after waiting for the expected element is located.</p>
+	<strong>Inputs:</strong>
+	<p><ul>
+		<li><a>Expected</a>: specify the expected value to compare. The <code>msg.expected</code> will override the <code>Expected</code> field if set.</li>
+		<li><a>By</a>: specify the way to find an element by selector. The <code>msg.selector</code> will override the <code>By</code> field if set.</li>
+		<li><a>Target</a>: specify the selector's value to lookup. The<code>msg.target</code> will override the <code>Target</code> field if set.</li>
+		<li><a>Timeout</a>: specify the timeout during lookup operation. The <code>msg.timeout</code> will override the <code>Timeout</code> field if set.</li>
+		<li><a>Wait For</a>: specify the time to wait before looing up. The <code>msg.waitfor</code> will override the <code>Wait For</code> field if set.</li>
+	</ul></p>	
+	<p>If the <code>msg.filename</code> is passed through, the <code>msg.payload</code> will be written into the file path.</p>
+	<strong>Outputs:</strong>
+	<p><code>msg.error</code> When the object is unexpected or cannot find element, this node generates the error with detail information</p>
+	<p><code>msg.element</code> If the element is found, it will be passed though the msg object to the next node.</p>
+	<p><code>msg.payload</code> contains the result of the <code>value</code> attribute.</p>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('get-value', {
+		category: 'Browser',
+		defaults: {
+			name: {
+				value: ""
+			},
+			expected: {
+				value: ""
+			},
+			page: {
+				type: 'web-page',
+				required: true
+			},
+			target: {
+				type: 'web-element',
+				required: true
+			},
+			selector: {
+				value: "",
+				required: false
+			},
+			timeout: {
+				value: 1000,
+				validate: RED.validators.number()
+			},
+			waitfor: {
+				value: 500,
+				validate: RED.validators.number()
+			},
+			store: { value: "", validate: RED.validators.typedInput("storeType") },
+			storeType: { value: "str" },
+			savetofile: {
+				value: false
+			}
+		},
+		color: "#d8bfd8",
+		inputs: 1,
+		outputs: 1,
+		icon: "debug.png",
+		label: function () {
+			return this.name || "Get Value";
+		},
+		labelStyle: function () {
+			return this.name ? "node_label_italic" : "";
+		},
+		oneditprepare: function () {
+			console.log('RED.variables');
+			console.log(RED.variables);
+			var optionDoNotSave = { value: "nul", label: 'Not Stored', hasValue: false };
+			//var optionDoNotSave = {value:"nul",label:'Not Stored',hasValue:true, autocomplete:true, autocompleteOptions:['2','6','6','8']};
+			// var flowWithAuto = {value:"flow",label:"flow.",validate:RED.utils.validatePropertyExpression, autocomplete:true, autocompleteOptions:};
+			makeTypedInputFields([
+				{ name: 'store', type: 'storeType', valid: ['msg', 'global', 'flow', optionDoNotSave], inst: this.storeType, default: 'nul' }
+			]);
+
+			console.log('oneditprepare1 %s', this.target);
+			const that = this;
+			RED.customUtil.handleTargetUpdate(that);
+			console.log('oneditprepare2 %s', this.target);
+		},
+		oneditsave: function () {
+			console.log('oneditsave %s', this.target);
+		}
+	}); 
+
+</script>
+
+<script type="text/x-red" data-template-name="get-attribute">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
+		<input type="text" id="node-input-name">
+	</div>
+	<div class="form-row">
+		<label for="node-input-attribute"><i class="fa fa-empire"></i> <span>Attribute</span></label>
+		<input type="text" id="node-input-attribute">
+	</div>
+	<div class="form-row">
+		<label for="node-input-expected"><i class="fa fa-empire"></i> <span>Expected</span></label>
+		<input type="text" id="node-input-expected">
+	</div>
+	</div>
+	<div class="form-row">
+		<label for="node-input-page"><i class="fa fa-file"></i> <span>Page</span></label>
+		<input type="text" id="node-input-page">
+	</div>
+	<div class="form-row">
+		<label for="node-input-target"><i class="fa fa-crosshairs"></i> <span>Target</span></label>
+		 <input type="text" id="node-input-target"> 
+		<!-- <select id="node-input-target">
+		</select> -->
+		<input type="hidden" id="node-input-selector" style="display: inline-block;">
+	</div>
+	<div class="form-row">
+		<label for="node-input-timeout"><i class="fa fa-empire"></i> <span>Timeout</span></label>
+		<input type="text" id="node-input-timeout" value="1000">
+	</div>
+	<div class="form-row">
+		<label for="node-input-waitfor"><i class="fa fa-empire"></i> <span>Wait For</span></label>
+		<input type="text" id="node-input-waitfor" value="00">
+	</div>
+	<!-- <div class="form-row">		
+		<input type="checkbox" id="node-input-savetofile" value="false" style="display: inline-block; width: auto; vertical-align: top;">
+		<label for="node-input-savetofile" style="width: 70%"> <span>Save the value to a specific filename.</span></label>
+	</div> -->
+	<div class="form-row">
+		<label for="node-input-store"><i class="fa fa-empire"></i> <span>Store</span></label>
+		<input type="text" id="node-input-store" style="width:70%" />
+		<input type="hidden" id="node-input-storeType" />
+	</div>
+</script>
+
+<script type="text/x-red" data-help-name="get-attribute">
+	<p>Get the attribute from <code>attribute</code> of the <code>msg.element</code> or after waiting for the expected element is located.</p>
+	<strong>Inputs:</strong>
+	<p><ul>
+		<li><a>Attribute</a>: specify the attribute to get. The <code>msg.attribute</code> will override the <code>Attribute</code> field if set.</li>
+		<li><a>Expected</a>: specify the expected value to cpmpare. The <code>msg.expected</code> field if set.</li>
+		<li><a>By</a>: specify the way to find an element by selector. The <code>msg.selector</code> will override the <code>By</code> field if set.</li>
+		<li><a>Target</a>: specify the selector's value to lookup. The<code>msg.target</code> will override the <code>Target</code> field if set.</li>
+		<li><a>Timeout</a>: specify the timeout during lookup operation. The <code>msg.timeout</code> will override the <code>Timeout</code> field if set.</li>
+		<li><a>Wait For</a>: specify the time to wait before looing up. The <code>msg.waitfor</code> will override the <code>Wait For</code> field if set.</li>
+	</ul></p>	
+	<p>If the <code>msg.filename</code> is passed through, the <code>msg.payload</code> will be written into the file path.</p>
+	<strong>Outputs:</strong>
+	<p><code>msg.error</code> When the object is unexpected or cannot find element, this node generates the error with detail information</p>
+	<p><code>msg.element</code> If the element is found, it will be passed though the msg object to the next node.</p>
+	<p><code>msg.payload</code> contains the result of the <code>value</code> attribute.</p>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('get-attribute', {
+		category : 'Browser',
+		defaults : {
+			name : {
+				value : ""
+			},
+			attribute : {
+				value : ""
+			},
+			expected : {
+				value : ""
+			},
+			page: {
+				type: 'web-page',
+				required: true
+			},
+			target: {
+				type: 'web-element',
+				required: true
+			},
+			selector: {
+				value: "",
+				required: false
+			},
+			timeout : {
+				value : 1000,
+				validate : RED.validators.number()
+			},
+			waitfor : {
+				value : 500,
+				validate : RED.validators.number()
+			},
+			store: { value: "", validate: RED.validators.typedInput("storeType") },
+			storeType: { value: "str" },
+			savetofile : {
+				value : false
+			}
+		},
+		color : "#d8bfd8",
+		inputs : 1,
+		outputs : 1,
+		icon : "debug.png",
+		label : function() {
+			return this.name || "Get Attribute";
+		},
+		labelStyle : function() {
+			return this.name ? "node_label_italic" : "";
+		},
+		oneditprepare: function () {
+
+			var optionDoNotSave = {value:"nul",label:'Not Stored',hasValue:false};
+			makeTypedInputFields([
+				{ name: 'store', type: 'storeType', valid: ['msg', 'global', 'flow', optionDoNotSave], inst: this.storeType, default: 'nul' }
+			]);
+
+			console.log('oneditprepare1 %s', this.target);
+			const that = this;
+			RED.customUtil.handleTargetUpdate(that);
+			console.log('oneditprepare2 %s', this.target);
+		},
+		oneditsave:function(){
+			console.log('oneditsave %s',this.target);
+		}
+	}); 
+</script>
+
+<script type="text/x-red" data-template-name="get-text">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
+		<input type="text" id="node-input-name">
+	</div>
+	<div class="form-row">
+		<label for="node-input-expected"><i class="fa fa-globe"></i> <span>Expected</span></label>
+		<input type="text" id="node-input-expected">
+	</div>
+	</div>
+	<div class="form-row">
+		<label for="node-input-page"><i class="fa fa-file"></i> <span>Page</span></label>
+		<input type="text" id="node-input-page">
+	</div>
+	<div class="form-row">
+		<label for="node-input-target"><i class="fa fa-crosshairs"></i> <span>Target</span></label>
+		 <input type="text" id="node-input-target"> 
+		<!-- <select id="node-input-target">
+		</select> -->
+		<input type="hidden" id="node-input-selector" style="display: inline-block;">
+	</div>
+	<div class="form-row">
+		<label for="node-input-timeout"><i class="fa fa-empire"></i> <span>Timeout</span></label>
+		<input type="text" id="node-input-timeout" value="1000">
+	</div>
+	<div class="form-row">
+		<label for="node-input-waitfor"><i class="fa fa-empire"></i> <span>Wait For</span></label>
+		<input type="text" id="node-input-waitfor" value="00">
+	</div>
+	<!-- <div class="form-row">		
+		<input type="checkbox" id="node-input-savetofile" value="false" style="display: inline-block; width: auto; vertical-align: top;">
+		<label for="node-input-savetofile" style="width: 70%"> <span>Save the value to a specific filename.</span></label>
+	</div> -->
+	<div class="form-row">
+		<label for="node-input-store"><i class="fa fa-empire"></i> <span>Store</span></label>
+		<input type="text" id="node-input-store" style="width:70%" />
+		<input type="hidden" id="node-input-storeType" />
+	</div>
+</script>
+
+<script type="text/x-red" data-help-name="get-text">
+	<p>Get the text of the <code>msg.element</code> passed from previous node or after waiting for the expected element is located.</p>
+	<strong>Inputs:</strong>
+	<p><ul>
+		<li><a>Expected</a>: specify the expected value to cpmpare. The <code>msg.expected</code> will override the <code>Expected</code> field if set.</li>
+		<li><a>By</a>: specify the way to find an element by selector. The <code>msg.selector</code> will override the <code>By</code> field if set.</li>
+		<li><a>Target</a>: specify the selector's value to lookup. The<code>msg.target</code> will override the <code>Target</code> field if set.</li>
+		<li><a>Timeout</a>: specify the timeout during lookup operation. The <code>msg.timeout</code> will override the <code>Timeout</code> field if set.</li>
+		<li><a>Wait For</a>: specify the time to wait before looing up. The <code>msg.waitfor</code> will override the <code>Wait For</code> field if set.</li>
+	</ul></p>	
+	<p>If the <code>msg.filename</code> is passed through, the <code>msg.payload</code> will be written into the file path.</p>
+	<strong>Outputs:</strong>
+	<p><code>msg.error</code> When the object is unexpected or cannot find element, this node generates the error with detail information</p>
+	<p><code>msg.element</code> If the element is found, it will be passed though the msg object to the next node.</p>
+	<p><code>msg.payload</code> contains the result of the <code>text</code> attribute.</p>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('get-text', {
+		category : 'Browser',
+		defaults : {
+			name : {
+				value : ""
+			},
+			expected : {
+				value : ""
+			},
+			page: {
+				type: 'web-page',
+				required: true
+			},
+			target: {
+				type: 'web-element',
+				required: true
+			},
+			selector: {
+				value: "",
+				required: false
+			},
+			timeout : {
+				value : 1000,
+				validate : RED.validators.number()
+			},
+			waitfor : {
+				value : 500,
+				validate : RED.validators.number()
+			},
+			store: { value: "", validate: RED.validators.typedInput("storeType") },
+			storeType: { value: "str" },
+			savetofile : {
+				value : false
+			}
+		},
+		color : "#d8bfd8",
+		inputs : 1,
+		outputs : 1,
+		icon : "debug.png",
+		label : function() {
+			return this.name || "Get Text";
+		},
+		labelStyle : function() {
+			return this.name ? "node_label_italic" : "";
+		},
+		oneditprepare: function () {
+
+			var optionDoNotSave = {value:"nul",label:'Not Stored',hasValue:false};
+			makeTypedInputFields([
+				{ name: 'store', type: 'storeType', valid: ['msg', 'global', 'flow', optionDoNotSave], inst: this.storeType, default: 'nul' }
+			]);
+
+			console.log('oneditprepare1 %s', this.target);
+			const that = this;
+			RED.customUtil.handleTargetUpdate(that);
+			console.log('oneditprepare2 %s', this.target);
+		},
+		oneditsave:function(){
+			console.log('oneditsave %s',this.target);
+		}
+	}); 
+</script>
+
+<script type="text/x-red" data-template-name="run-script">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
+		<input type="text" id="node-input-name">
+	</div>
+	</div>
+	<div class="form-row">
+		<label for="node-input-page"><i class="fa fa-file"></i> <span>Page</span></label>
+		<input type="text" id="node-input-page">
+	</div>
+	<div class="form-row">
+		<label for="node-input-target"><i class="fa fa-crosshairs"></i> <span>Target</span></label>
+		 <input type="text" id="node-input-target"> 
+		<!-- <select id="node-input-target">
+		</select> -->
+		<input type="hidden" id="node-input-selector" style="display: inline-block;">
+	</div>
+	<div class="form-row">
+		<label for="node-input-timeout"><i class="fa fa-empire"></i> <span>Timeout</span></label>
+		<input type="text" id="node-input-timeout" value="1000">
+	</div>
+	<div class="form-row">
+		<label for="node-input-waitfor"><i class="fa fa-empire"></i> <span>Wait For</span></label>
+		<input type="text" id="node-input-waitfor" value="00">
+	</div>
+	<div class="form-row" style="margin-bottom: 0px;">
+		<label for="node-input-func"><i class="fa fa-wrench"></i> <span>Function</span></label>
+		<input type="hidden" id="node-input-func" autofocus="autofocus">
+		<input type="hidden" id="node-input-noerr">
+	</div>
+	<div class="form-row node-text-editor-row">
+	<div style="height: 250px;" class="node-text-editor" id="node-input-func-editor" ></div>
+	</div>
+</script>
+
+<script type="text/x-red" data-help-name="run-script">
+	<p>A function block where you can write code to run in the browser context of an existing element.</p>
+	<p>The parameters is passed in as a JavaScript object called <code>msg.driver</code> and <code>msg.element</code>.</p>
+	<strong>Outputs:</strong>
+	<p><code>msg.error</code> When the object is unexpected or cannot find element, this node generates the error with detail information</p>
+	<p><code>msg.element</code> If the element is found, it will be passed though the msg object to the next node.</p>	
+	<strong>Logging and Error Handling</strong>
+	<p>To log any information, or report an error, the following functions are available:</p>
+	<ul>
+	<li><code>node.log("Log")</code></li>
+	<li><code>node.warn("Warning")</code></li>
+	<li><code>node.error("Error")</code></li>
+	</ul>
+	</p>
+	<p>The Catch node can also be used to handle errors. To invoke a Catch node,
+	pass <code>msg</code> as a second argument to <code>node.error</code>:</p>
+	<pre>node.error("Error",msg)</pre>
+	<h4>Sending messages</h4>
+	<p>The function can either return the messages it wants to pass on to the next nodes
+	in the flow, or can call <code>node.send(messages)</code>.</p>
+	<p>It can return/send:</p>
+	<ul>
+	<li>a single message object - passed to nodes connected to the first output</li>
+	<li>an array of message objects - passed to nodes connected to the corresponding outputs</li>
+	</ul>
+	<p>If any element of the array is itself an array of messages, multiple
+	messages are sent to the corresponding output.</p>
+	<p>If null is returned, either by itself or as an element of the array, no
+	message is passed on.</p>
+	<p>See the <a target="_new" href="http://nodered.org/docs/writing-functions.html">online documentation</a> for more help.</p>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('run-script', {
+		category : 'Browser',
+		defaults : {
+			name : {
+				value : ""
+			},
+			func : {
+				value : "console.log(arguments[0].innerHTML);\nreturn msg;"
+			},
+			page: {
+				type: 'web-page',
+				required: true
+			},
+			target: {
+				type: 'web-element',
+				required: true
+			},
+			selector: {
+				value: "",
+				required: false
+			},
+			timeout : {
+				value : 1000,
+				validate : RED.validators.number()
+			},
+			waitfor : {
+				value : 500,
+				validate : RED.validators.number()
+			}
+		},
+		color : "#d8bfd8",
+		inputs : 1,
+		outputs : 1,
+		icon : "debug.png",
+		label : function() {
+			return this.name || "Run Script";
+		},
+		labelStyle : function() {
+			return this.name ? "node_label_italic" : "";
+		},
+		oneditprepare : function() {
+			// var that = this;
+
+			console.log('oneditprepare1 %s', this.target);
+			const that = this;
+			RED.customUtil.handleTargetUpdate(that);
+			console.log('oneditprepare2 %s', this.target);
+
+			function functionDialogResize() {
+				var rows = $("#dialog-form>div:not(.node-text-editor-row)");
+				var height = $("#dialog-form").height();
+				for (var i = 0; i < rows.size(); i++) {
+					height -= $(rows[i]).outerHeight(true);
+				}
+				var editorRow = $("#dialog-form>div.node-text-editor-row");
+				height -= (parseInt(editorRow.css("marginTop")) + parseInt(editorRow.css("marginBottom")));
+				$(".node-text-editor").css("height", height + "px");
+				that.editor.resize();
+			}
+
+
+			$("#dialog").on("dialogresize", functionDialogResize);
+			$("#dialog").one("dialogopen", function(ev) {
+				var size = $("#dialog").dialog('option', 'sizeCache-function');
+				if (size) {
+					$("#dialog").dialog('option', 'width', size.width);
+					$("#dialog").dialog('option', 'height', size.height);
+					functionDialogResize();
+				}
+			});
+			$("#dialog").one("dialogclose", function(ev, ui) {
+				var height = $("#dialog").dialog('option', 'height');
+				$("#dialog").off("dialogresize", functionDialogResize);
+			});
+
+			this.editor = RED.editor.createEditor({
+				id : 'node-input-func-editor',
+				mode : 'ace/mode/javascript',
+				value : $("#node-input-func").val()
+			});
+			this.editor.focus();
+		},
+		oneditsave : function() {
+			var annot = this.editor.getSession().getAnnotations();
+			this.noerr = 0;
+			$("#node-input-noerr").val(0);
+			for (var k = 0; k < annot.length; k++) {
+				//console.log(annot[k].type,":",annot[k].text, "on line", annot[k].row);
+				if (annot[k].type === "error") {
+					$("#node-input-noerr").val(annot.length);
+					this.noerr = annot.length;
+				}
+			}
+			$("#node-input-func").val(this.editor.getValue());
+			delete this.editor;
+		}
+	}); 
+</script>
+
+<script type="text/x-red" data-template-name="screenshot">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
+		<input type="text" id="node-input-name">
+	</div>
+	<div class="form-row">
+		<label for="node-input-filename"><i class="fa fa-file"></i> <span>File</span></label>
+		<input type="text" id="node-input-filename">
+		<input type="text" id="node-input-filenameType">
+	</div>
+		</div>
+	<div class="form-row">
+		<label for="node-input-page"><i class="fa fa-file"></i> <span>Page</span></label>
+		<input type="text" id="node-input-page">
+	</div>
+	<div class="form-row">
+		<label for="node-input-target"><i class="fa fa-crosshairs"></i> <span>Target</span></label>
+		 <input type="text" id="node-input-target"> 
+		<!-- <select id="node-input-target">
+		</select> -->
+		<input type="hidden" id="node-input-selector" style="display: inline-block;">
+	</div>
+	<div class="form-row">
+		<label for="node-input-timeout"><i class="fa fa-empire"></i> <span>Timeout</span></label>
+		<input type="text" id="node-input-timeout" value="1000">
+	</div>
+	<div class="form-row">
+		<label for="node-input-waitfor"><i class="fa fa-empire"></i> <span>Wait For</span></label>
+		<input type="text" id="node-input-waitfor" value="00">
+	</div>
+</script>
+
+<script type="text/x-red" data-help-name="screenshot">
+	<p>Schedule a command to take a screenshot.</p>
+	<strong>Inputs:</strong>
+	<p><ul>
+		<li><a>File</a>: specify the file path to write to. The <code>msg.filename</code> will override the <code>File</code> field if set.</li>
+		<li><a>By</a>: specify the way to find an element by selector. The <code>msg.selector</code> will override the <code>By</code> field if set.</li>
+		<li><a>Target</a>: specify the selector's value to lookup. The<code>msg.target</code> will override the <code>Target</code> field if set.</li>
+		<li><a>Timeout</a>: specify the timeout during lookup operation. The <code>msg.timeout</code> will override the <code>Timeout</code> field if set.</li>
+		<li><a>Wait For</a>: specify the time to wait before looing up. The <code>msg.waitfor</code> will override the <code>Wait For</code> field if set.</li>
+	</ul></p>	
+	<strong>Outputs:</strong>
+	<p><code>msg.payload</code> contains the screenshot as a base-64 encoded PNG if <code>filename</code> is not specified.</p>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('screenshot', {
+		category : 'Browser',
+		defaults : {
+			name : {
+				value : ""
+			},
+			filename: { value: "", required:true, validate: RED.validators.typedInput("filenameType") },
+			filenameType: { value: "str" },
+			page: {
+				type: 'web-page',
+				required: true
+			},
+			target: {
+				type: 'web-element',
+				required: true
+			},
+			selector: {
+				value: "",
+				required: false
+			},
+			timeout : {
+				value : 1000,
+				validate : RED.validators.number()
+			},
+			waitfor : {
+				value : 500,
+				validate : RED.validators.number()
+			}
+		},
+		color : "#d8bfd8",
+		inputs : 1,
+		outputs : 1,
+		icon : "debug.png",
+		label : function() {
+			return this.name || "Screenshot";
+		},
+		labelStyle : function() {
+			return this.name ? "node_label_italic" : "";
+		},
+		oneditprepare: function () {
+
+			makeTypedInputFields([
+				{ name: 'filename', type: 'filenameType', valid: ['msg', 'global', 'flow', 'str'], inst: this.filenameType, default: 'str' }
+			]);
+
+			console.log('oneditprepare1 %s', this.target);
+			const that = this;
+			RED.customUtil.handleTargetUpdate(that);
+			console.log('oneditprepare2 %s', this.target);
+		},
+		oneditsave:function(){
+			console.log('oneditsave %s',this.target);
+		}
+	}); 
+</script>
+
+<script type="text/x-red" data-template-name="nav-to">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
+		<input type="text" id="node-input-name">
+	</div>
+	<div class="form-row">
+		<label for="node-input-url"><i class="fa fa-globe"></i> <span>URL</span></label>
+		<input type="text" id="node-input-url">
+		<input type="hidden" id="node-input-urlType">
+	</div>
+	<div class="form-row">
+		<label for="node-input-waitfor"><i class="fa fa-empire"></i> <span>Wait For</span></label>
+		<input type="text" id="node-input-waitfor" value="00">
+	</div>
+</script>
+
+<script type="text/x-red" data-help-name="nav-to">
+	<p>Using Selenium WebDriver to schedules a command to navigate to a new URL.</p>
+	<strong>Inputs:</strong>
+	<p><ul>		
+		<li><a>URL</a>: specify the url to navigate to.</li>		
+		<li><a>Wait For</a>: specify the delay before executing this operation.</li>
+	</ul></p>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('nav-to', {
+		category : 'Browser',
+		defaults : {
+			name : {
+				value : ""
+			},
+			url: { value: "", required:true, validate: RED.validators.typedInput("urlType") },
+			urlType: { value: "str" },
+			waitfor : {
+				value : 500,
+				validate : RED.validators.number()
+			}
+		},
+		color : "#d8bfd8",
+		inputs : 1,
+		outputs : 1,
+		icon : "debug.png",
+		label : function() {
+			return this.name || "Go to";
+		},
+		labelStyle : function() {
+			return this.name ? "node_label_italic" : "";
+		},
+		oneditprepare: function(){
+			makeTypedInputFields([
+				{ name: 'url', type: 'urlType', valid: ['msg', 'global', 'flow', 'str'], inst: this.urlType, default: 'str' }
+			]);
+		}
+	}); 
+</script>
+
+<script type="text/x-red" data-template-name="nav-back">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
+		<input type="text" id="node-input-name">
+	</div>
+	<div class="form-row">
+		<label for="node-input-waitfor"><i class="fa fa-empire"></i> <span>Wait For</span></label>
+		<input type="text" id="node-input-waitfor" value="00">
+	</div>
+</script>
+
+<script type="text/x-red" data-help-name="nav-back">
+	<p>Using Selenium WebDriver to schedules a command to navigate back to previous page.</p>
+	<strong>Inputs:</strong>
+	<p><ul>
+		<li><a>Wait For</a>: specify the delay before executing this operation.</li>
+	</ul></p>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('nav-back', {
+		category : 'Browser',
+		defaults : {
+			name : {
+				value : ""
+			},
+			waitfor : {
+				value : 500,
+				validate : RED.validators.number()
+			}
+		},
+		color : "#d8bfd8",
+		inputs : 1,
+		outputs : 1,
+		icon : "debug.png",
+		label : function() {
+			return this.name || "Back";
+		},
+		labelStyle : function() {
+			return this.name ? "node_label_italic" : "";
+		}
+	}); 
+</script>
+
+<script type="text/x-red" data-template-name="nav-forward">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
+		<input type="text" id="node-input-name">
+	</div>
+	<div class="form-row">
+		<label for="node-input-waitfor"><i class="fa fa-empire"></i> <span>Wait For</span></label>
+		<input type="text" id="node-input-waitfor" value="00">
+	</div>
+</script>
+
+<script type="text/x-red" data-help-name="nav-forward">
+	<p>Using Selenium WebDriver to schedules a command to navigate forward to next page.</p>
+	<strong>Inputs:</strong>
+	<p><ul>
+		<li><a>Wait For</a>: specify the delay before executing this operation.</li>
+	</ul></p>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('nav-forward', {
+		category : 'Browser',
+		defaults : {
+			name : {
+				value : ""
+			},
+			waitfor : {
+				value : 500,
+				validate : RED.validators.number()
+			}
+		},
+		color : "#d8bfd8",
+		inputs : 1,
+		outputs : 1,
+		icon : "debug.png",
+		label : function() {
+			return this.name || "Forward";
+		},
+		labelStyle : function() {
+			return this.name ? "node_label_italic" : "";
+		}
+	}); 
+</script>
+
+<script type="text/x-red" data-template-name="nav-refresh">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
+		<input type="text" id="node-input-name">
+	</div>
+	<div class="form-row">
+		<label for="node-input-waitfor"><i class="fa fa-empire"></i> <span>Wait For</span></label>
+		<input type="text" id="node-input-waitfor" value="00">
+	</div>
+</script>
+
+<script type="text/x-red" data-help-name="nav-refresh">
+	<p>Using Selenium WebDriver to schedules a command to refreash the current page.</p>
+	<strong>Inputs:</strong>
+	<p><ul>
+		<li><a>Wait For</a>: specify the delay before executing this operation.</li>
+	</ul></p>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('nav-refresh', {
+		category : 'Browser',
+		defaults : {
+			name : {
+				value : ""
+			},
+			waitfor : {
+				value : 500,
+				validate : RED.validators.number()
+			}
+		},
+		color : "#d8bfd8",
+		inputs : 1,
+		outputs : 1,
+		icon : "debug.png",
+		label : function() {
+			return this.name || "Refresh";
+		},
+		labelStyle : function() {
+			return this.name ? "node_label_italic" : "";
+		}
+	}); 
+</script>

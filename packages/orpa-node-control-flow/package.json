@@ -1,0 +1,33 @@
+{
+  "name": "@torpadev/orpa-node-control-flow",
+  "version": "0.1.4",
+  "description": "Set of nodes to aid with control flow constructs in orpa",
+  "main": "init.js",
+  "scripts": {
+    "lint": "gulp lint"
+  },
+  "keywords": [
+    "orpa",
+    "node-red",
+    "control",
+    "flow"
+  ],
+  "node-red": {
+    "nodes": {
+      "orpa-loops": "orpa-loops.js"
+    }
+  },
+  "engines": {
+    "node": ">= 8.9.0"
+  },
+  "author": "Shiva Kumar Madhavan",
+  "devDependencies": {
+    "eslint": "^4.11.0",
+    "eslint-config-google": "^0.9.1",
+    "gulp": "^3.9.1",
+    "gulp-eslint": "^4.0.0",
+    "gulp-eslint-threshold": "^0.1.1",
+    "gulp-if": "^2.0.2"
+  },
+  "license": "GPL-3.0"
+}

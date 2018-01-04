@@ -1,0 +1,50 @@
+{
+    "loop": {
+        "common": {
+            "label": {
+                "name": "Name"
+            }
+        },
+        "label": {
+            "property": "Property",
+            "rule": "rule",
+            "type":"Type",
+            "attrs":"Parameters"
+        },
+        "types":{
+            "for":{
+                "name":"Count (for i to n)",
+                "start":"Start from",
+                "end": "Count till",
+                "step": "Step by"
+            },
+            "foreach":{
+                "name":"Collection (foreach item in list)",
+                "label":{
+                    "collection":"Collection"
+                }
+            },
+            "while":{
+                "name":"Condition (while condition)"
+            }
+        },
+        "and": "and",
+        "checkall": "checking all rules",
+        "stopfirst": "stopping after first match",
+        "ignorecase": "ignore case",
+        "rules": {
+            "btwn": "is between",
+            "cont": "contains",
+            "regex": "matches regex",
+            "true": "is true",
+            "false": "is false",
+            "null": "is null",
+            "nnull": "is not null",
+            "else": "otherwise"
+        },
+        "errors": {
+            "invalid-expr": "Invalid JSONata expression: __error__",
+            "not-an-iterable": "Invalid type for iterating: __error__"
+        }
+    }
+}
