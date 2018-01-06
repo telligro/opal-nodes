@@ -1,4 +1,4 @@
-## orpa-node-selenium-webdriver [![orpa-node-selenium-webdriver build status](https://frozen-fortress-98851.herokuapp.com/parodotdev/orpa-nodes/20/badge?subject=build)](https://travis-ci.org/parodotdev/orpa-nodes)
+## orpa-node-selenium-webdriver [![orpa-node-selenium-webdriver build status](https://frozen-fortress-98851.herokuapp.com/telligro/orpa-nodes/20/badge?subject=build)](https://travis-ci.org/telligro/orpa-nodes)
 ### This module is part of the OPAL framework
 #### Nodes: 
 * open web 

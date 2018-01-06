@@ -1,4 +1,4 @@
-## orpa-node-email [![orpa-node-email build status](https://frozen-fortress-98851.herokuapp.com/parodotdev/orpa-nodes/8/badge?subject=build)](https://travis-ci.org/parodotdev/orpa-nodes)
+## orpa-node-email [![orpa-node-email build status](https://frozen-fortress-98851.herokuapp.com/telligro/orpa-nodes/8/badge?subject=build)](https://travis-ci.org/telligro/orpa-nodes)
 ### This module is part of the OPAL framework
 #### Nodes: 
 * email send
