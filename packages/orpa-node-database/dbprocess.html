@@ -1,0 +1,151 @@
+<script type="text/x-red" data-template-name="querydb-read">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-globe"></i> <span>Name</span></label>
+		<input type="text" id="node-input-name">
+	</div>
+	<div class="form-row">
+        <label for="node-input-dbtype"><i class="fa fa-empire"></i> <span>DB Type</span></label>
+        <select id="node-input-dbtype" style="width:125px !important">
+            <option value="mysql">MySQL</option>
+        </select>
+	</div>
+	<div class="form-row">
+		<label for="node-input-server"><i class="fa fa-globe"></i> <span>Server</span></label>
+		<input type="text" id="node-input-server">
+	</div>
+	<div class="form-row">
+		<label for="node-input-database"><i class="fa fa-globe"></i> <span>Database</span></label>
+		<input type="text" id="node-input-database">
+	</div>
+	<div class="form-row">
+		<label for="node-input-port"><i class="fa fa-globe"></i> <span>Port</span></label>
+		<input type="text" id="node-input-port">
+	</div>
+	<div class="form-row">
+		<label for="node-input-connstr"><i class="fa fa-globe"></i> <span>Connection String</span></label>
+		<input type="text" id="node-input-connstr">
+		<input type="hidden" id="node-input-connstrType" />
+	</div>
+	<div class="form-row">
+		<label for="node-input-username"><i class="fa fa-globe"></i> <span>Username</span></label>
+		<input type="text" id="node-input-username">
+		<input type="hidden" id="node-input-usernameType" />
+	</div>
+	<div class="form-row">
+		<label for="node-input-password"><i class="fa fa-globe"></i> <span>Password</span></label>
+		<input type="password" id="node-input-password">
+		<input type="hidden" id="node-input-passwordType" />
+	</div>
+	<div class="form-row">
+		<label for="node-input-query"><i class="fa fa-empire"></i> <span>Query</span></label>
+		<input type="text" id="node-input-query">
+	</div>
+</script>
+
+<script type="text/x-red" data-help-name="querydb-read">
+	<p>Connects to mysql database based on the connections details provided and executes the specified query. Query results are returned as the output of the node.</p>
+	<strong>Inputs:</strong>
+	<p><ul>
+	    <li><a>DB Type</a>: Specify the type of database to connect (e.g. mysql, oracle, db2, etc.)</li>
+		<li><a>Server</a>: Specify the database server details (IP address or hostname)</li>
+		<li><a>Database</a>:Specify the database instance name.</li>
+		<li><a>Port</a>: Specify the port number to be used for connection</li>
+		<li><a>Connection String</a>: Specify the connection string for the database.</li>
+		<li><a>Username</a>: Specify the username for connecting to the database.</li>
+		<li><a>Password</a>: Specify the password for connecting to the database.</li>
+		<li><a>Query</a>: Specify the query to be executed on the database.</li>
+		<li><a>Timeout</a>: specify the timeout during lookup for the title operation.</li>
+	</ul></p>
+	<strong>Outputs:</strong>
+	<p><code>msg.error</code> When an error happens contains the error message from underlying database connection</p>
+	<p><code>msg.payload</code> contains the data read from database query</p>
+</script>
+
+<script type="text/javascript">
+//FIXME: Move this helper to a generic RED.utils like location so that it can be used across nodes
+	function makeTypedInputFields(inpList) {
+		console.log('makeTypedInputFields')
+		inpList.forEach((inpItem) => {
+			console.log('TI:%s-%s-%s-%s', inpItem.name, inpItem.type, inpItem.valid.toString(), inpItem.inst);
+			var inpId = "#node-input-" + inpItem.name;
+			var inpTypeId = "#node-input-" + inpItem.type;
+			$(inpTypeId).val(inpItem.inst);
+			$(inpId).typedInput({
+				default: inpItem.d,
+				typeField: $(inpTypeId),
+				types: [...inpItem.valid]
+			});
+			$(inpId).typedInput('type', inpItem.inst);
+		});
+	}
+	
+	RED.nodes.registerType('querydb-read', {
+		category : 'database',
+		defaults : {
+			name : {
+				value : ""
+			},
+            dbtype : {
+                value : "",
+                required : true
+			},
+			server:{
+				value: ""
+			},
+			database : {
+				value : ""
+			},
+			port : {
+				value : '3306'
+			},
+			connstr : { value : "", validate: RED.validators.typedInput("connstrType")},
+			connstrType: { value: "str" },
+			username : { value : "", validate: RED.validators.typedInput("usernameType")},
+			usernameType: { value: "str" },
+			password : { value : "", validate: RED.validators.typedInput("passwordType")},
+			passwordType: { value: "str" },
+			query : {
+				value : ""
+			},
+			timeout : {
+				value : 3000,
+				required : true,
+				validate : RED.validators.number()
+			}
+		},
+		credentials: {
+			username: { type: "text" },
+			password: { type: "password" }
+		},
+		color : "#F5B041",
+		inputs : 1,
+		outputs : 1,
+		icon : "db.png",
+		label : function() {
+			return this.name ||  "Query DB";
+		},
+		labelStyle : function() {
+			return this.name ? "node_label_italic" : "";
+		},oneditprepare: function () {
+			
+			//TypeInput Start
+			//INFO: Provides the widget to select the type of input value (including vavriables)
+			makeTypedInputFields([
+				{ name: 'connstr', type: 'connstrType', valid: ['global', 'flow', 'str'], inst: this.connstrType, d: 'str' },
+				{ name: 'username', type: 'usernameType', valid: ['global', 'flow', 'str'], inst: this.usernameType, d: 'str' },
+				{ name: 'password', type: 'passwordType', valid: ['global', 'flow', 'str'], inst: this.passwordType, d: 'str' }
+			]);
+
+			
+			
+
+		},
+		oneditsave: function () {
+			var selectedVal = $('#node-input-mode option:selected').val();
+			if (selectedVal === 'cols') {
+				var cols = $('#read-mode-row-cols').val();
+
+			}
+		}
+	}); 
+</script>
