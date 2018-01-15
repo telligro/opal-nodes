@@ -3,7 +3,7 @@
 	"version": "0.2.1",
 	"description": "selenium-webdriver nodes for OPAL. Inspired by node-red-node-selenium-webdriver",
 	"dependencies": {
-		"@torpadev/orpa-page-object-finder": "~0.1.0",
+		"@torpadev/orpa-page-object-finder": "~0.2.0",
 		"easyimage": ">=2.1.0",
 		"fast-deep-equal": "^1.0.0",
 		"fs-extra": ">=0.30.0",
