@@ -1,0 +1,40 @@
+{
+  "name": "@torpadev/opal-node-pdfreader",
+  "version": "0.1.0",
+  "description": "PDF Reader nodes for OPAL",
+  "dependencies": {
+    "check-types": ">=7.3.0",
+    "fs-extra": ">=4.0.2",
+    "is-utf8": ">=0.2.1",
+    "pdf2json": "~1.1.7"
+  },
+  "license": "GPL-3.0",
+  "keywords": [
+    "node-red",
+    "pdf",
+    "json",
+    "pdf2json",
+    "opal"
+  ],
+  "node-red": {
+    "nodes": {
+      "pdfreader": "pdfreader.js"
+    }
+  },
+  "engines": {
+    "node": ">= 6.9.0"
+  },
+  "author": "Shiva <shiva.madhavan@gmail.com>",
+  "devDependencies": {
+    "eslint": "^4.11.0",
+    "eslint-config-google": "^0.9.1",
+    "gulp": "^3.9.1",
+    "gulp-eslint": "^4.0.0",
+    "gulp-eslint-threshold": "^0.1.1",
+    "gulp-if": "^2.0.2"
+  },
+  "main": "pdfreader.js",
+  "scripts": {
+    "lint": "gulp lint"
+  }
+}

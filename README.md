@@ -17,6 +17,8 @@ Refer to  [orpa-setup](https://github.com/telligro/orpa-setup) project for more 
 [![orpa-node-control-flow build status](https://frozen-fortress-98851.herokuapp.com/telligro/orpa-nodes/17/badge?subject=build)](https://travis-ci.org/telligro/orpa-nodes)
 * [orpa-node-selenium-webdriver](https://github.com/telligro/orpa-nodes/tree/master/packages/orpa-node-selenium-webdriver)
 [![orpa-node-selenium-webdriver build status](https://frozen-fortress-98851.herokuapp.com/telligro/orpa-nodes/20/badge?subject=build)](https://travis-ci.org/telligro/orpa-nodes)
+* [opal-node-pdfreader](https://github.com/telligro/orpa-nodes/tree/master/packages/opal-node-pdfreader)
+[![opal-node-pdfreader build status](https://frozen-fortress-98851.herokuapp.com/telligro/orpa-nodes/23/badge?subject=build)](https://travis-ci.org/telligro/orpa-nodes)
 
 
 

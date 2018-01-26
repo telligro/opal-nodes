@@ -840,10 +840,6 @@ module.exports = function(RED) {
 
 
         this.on('input', function(msg) {
-            console.log(' idontExist.iwillcrash();');
-            setTimeout(() => {
-                idontExist.iwillcrash();
-            }, 2000);
             if (msg.topic == 'RESET') {
                 msg.refresh = true;
                 node.status({});

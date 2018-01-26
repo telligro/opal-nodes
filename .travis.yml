@@ -8,6 +8,7 @@ env:
 - CXX="g++-4.8" NODE_FOLDER=packages/orpa-node-soap
 - CXX="g++-4.8" NODE_FOLDER=packages/orpa-node-control-flow
 - CXX="g++-4.8" NODE_FOLDER=packages/orpa-node-selenium-webdriver
+- CXX="g++-4.8" NODE_FOLDER=packages/opal-node-pdfreader
 addons:
   apt:
     sources:
