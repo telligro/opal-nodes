@@ -1,6 +1,6 @@
 {
   "name": "@torpadev/opal-node-pdfreader",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "PDF Reader nodes for OPAL",
   "dependencies": {
     "check-types": ">=7.3.0",
