@@ -1,4 +1,4 @@
-## orpa-node-pdfreader [![Build Status](https://travis-ci.org/telligro/orpa-nodes.svg?branch=master)](https://travis-ci.org/telligro/orpa-nodes)
+## orpa-node-pdfreader [![orpa-node-pdfreader build status](https://frozen-fortress-98851.herokuapp.com/telligro/orpa-nodes/8/badge?subject=build)](https://travis-ci.org/telligro/orpa-nodes)
 ### This module is part of the OPAL framework
 #### Nodes: 
 * read pdf

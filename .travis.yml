@@ -17,9 +17,9 @@ addons:
     - g++-4.8
     - gcc-4.8
 node_js:
-- '9'
+#- '9'
 - '8'
-- '6'
+#- '6'
 script: npm install && gulp
 before_install: cd $NODE_FOLDER
 notifications:

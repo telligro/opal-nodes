@@ -1,4 +1,4 @@
-## orpa-node-database [![orpa-node-database build status](https://frozen-fortress-98851.herokuapp.com/telligro/orpa-nodes/5/badge?subject=build)](https://travis-ci.org/telligro/orpa-nodes)
+## orpa-node-database [![orpa-node-database build status](https://frozen-fortress-98851.herokuapp.com/telligro/orpa-nodes/2/badge?subject=build)](https://travis-ci.org/telligro/orpa-nodes)
 ### This module is part of the OPAL framework
 ### Nodes: 
 * querydb-read
