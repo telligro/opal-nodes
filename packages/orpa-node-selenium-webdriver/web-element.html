@@ -265,6 +265,7 @@
                                 console.log('addHere');
                                 $('#errPageMismatch').addClass('hidden');
                                 $('#node-config-input-expression').val(elementExpr);
+                                $('#node-config-input-selector').val('xpath');
                                 $('#node-config-input-expression').parsley().validate();
                             });
                             $('#errPageMismatch').removeClass('hidden');
@@ -297,6 +298,7 @@
                         } else {
                             console.log('noSimilarElement')
                             $('#node-config-input-expression').val(elementExpr);
+                            $('#node-config-input-selector').val('xpath');
                             $('#node-config-input-expression').parsley().validate();
                         }
 
