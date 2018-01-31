@@ -22,6 +22,7 @@ module.exports = function(RED) {
     const util = require('util');
     const check = require('check-types');
     const PDFParser = require('pdf2json');
+    const pdfreader = require('pdfreader');
 
     /**
    * sends Error back to node-red
@@ -70,6 +71,31 @@ module.exports = function(RED) {
         return pMsg;
     }
 
+    let rows = {}; // indexed by y-position
+    let pdfData = {
+        pages: [],
+    };
+    let pdfPage = {
+        lines: [],
+    };
+    /**
+     *
+     *
+     * @param {any} y
+     */
+    function collectRow(y) {
+        //   console.log((rows[y] || []).join(' * '));
+        pdfPage.lines.push((rows[y] || []).join(''));
+    }
+    /**
+     *
+     *
+     */
+    function collectRows() {
+        Object.keys(rows) // => array of y-positions (type: float)
+            .sort((y1, y2) => parseFloat(y1) - parseFloat(y2)) // sort float positions
+            .forEach(collectRow);
+    }
     /**
     * reads a pdf from the specified location
     * @function
@@ -88,7 +114,9 @@ module.exports = function(RED) {
             {name: 'preprocess'},
         ]);
 
-        if (!msgParams.preprocess) {
+
+        if (msgParams.preprocess !== 'true') {
+            console.log('No Preprocessing');
             pdfParser.on('pdfParser_dataError', (errData) => {
                 console.log(errData);
                 console.error(errData.parserError);
@@ -109,13 +137,59 @@ module.exports = function(RED) {
             });
             pdfParser.loadPDF(msgParams.location);
         } else {
-            // TODO: Use pdf reader rules
+            console.log('Preprocessing');
+            // pdfreader.LOG.toggle(true); // uncomment this to get DEBUG logs
+            new pdfreader.PdfReader().parseFileItems(msgParams.location, function(err, item) {
+                try {
+                    if (err) {
+                        console.error(err);
+                        sendError(node, msg, 'Could not parse pdf: %s', msgParams.location);
+                    } else if (!item || item.page) {
+                        // end of file, or page
+                        collectRows();
+                        rows = {}; // clear rows for next page
+                        if (pdfPage.lines.length > 0) {
+                            pdfData.pages.push(JSON.parse(JSON.stringify(pdfPage)));
+                        }
+                        if (item && item.page) {
+                            console.log('Processing Page ', item.page);
+                            pdfPage = {
+                                lines: [],
+                            };
+                        }
+
+                        if (!item) {
+                            console.log('All Pages Done');
+                            // console.log(JSON.stringify(pdfData));
+                            pdfData.pages.forEach((page, pageNo) => {
+                                console.log('Page ' + (pageNo + 1) + ':' + page.lines.length);
+                            });
+                            if (node.storeType === 'msg') {
+                                RED.util.setMessageProperty(msg, node.store, pdfData);
+                            } else if (node.storeType === 'flow') {
+                                node.context().flow.set(node.store, pdfData);
+                            } else if (node.storeType === 'global') {
+                                node.context().global.set(node.store, pdfData);
+                            }
+                            msg.payload = pdfData;
+                            node.send(msg);
+                        }
+                    } else if (item.text) {
+                        // accumulate text items into rows object, per line
+                        // console.log(item.y + ' ' + item.text);
+                        (rows[item.y] = rows[item.y] || []).push(item.text);
+                    }
+                } catch (ex) {
+                    console.error(ex);
+                    sendError(node, msg, 'Could not parse pdf: %s', msgParams.location);
+                }
+            });
         }
     }
 
 
     /**
-    * Handles the ReadExcel node
+    * Handles the ReadPDFNode node
     * FIXME: Move this helper to a generic RED.utils like location so that
     * it can be used across nodes
     * @function
@@ -123,8 +197,9 @@ module.exports = function(RED) {
     */
     function ReadPDFNode(params) {
         // FIXME:Cleanup
-        // console.log('RealExcelNode Called');
-        // node.log(JSON.stringify(params));
+        // console.log('ReadPDFNode Called');
+        let node = this;
+        node.log(JSON.stringify(params));
         RED.nodes.createNode(this, params);
         this.name = params.name;
         this.location = params.location;
@@ -133,7 +208,7 @@ module.exports = function(RED) {
         this.store = params.store;
         this.storeType = params.storeType;
         this.waitfor = params.waitfor;
-        let node = this;
+
         this.on('input', function(msg) {
             if (msg.error) {
                 // FIXME: Add error handling here

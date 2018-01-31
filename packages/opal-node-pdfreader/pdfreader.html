@@ -119,20 +119,20 @@
 			//FIXME: Cleanup, This workaround below needs to be addressed. 
 			//values from below porperties should get automatically populated like the rest
 
-			$('#node-input-removeEmptyC').change(function () {
+			$('#node-input-preprocessC').change(function () {
 				if (this.checked) {
-					$('#node-input-removeEmpty').val('true');
+					$('#node-input-preprocess').val('true');
 				} else {
-					$('#node-input-removeEmpty').val('false');
+					$('#node-input-preprocess').val('false');
 				}
 			});
 
-			if (this.removeEmpty === 'true') {
-				$('#node-input-removeEmpty').val('true');
-				$('#node-input-removeEmptyC').prop('checked', true);
+			if (this.preprocess === 'true') {
+				$('#node-input-preprocess').val('true');
+				$('#node-input-preprocessC').prop('checked', true);
 			} else {
-				$('#node-input-removeEmpty').val('false');
-				$('#node-input-removeEmptyC').prop('checked', false);
+				$('#node-input-preprocess').val('false');
+				$('#node-input-preprocessC').prop('checked', false);
 			}
 		},
 		oneditsave: function () {
