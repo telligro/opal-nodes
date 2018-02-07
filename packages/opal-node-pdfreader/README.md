@@ -1,4 +1,5 @@
-## opal-node-pdfreader [![opal-node-pdfreader build status](https://frozen-fortress-98851.herokuapp.com/telligro/orpa-nodes/8/badge?subject=build)](https://travis-ci.org/telligro/orpa-nodes)
+[![opal-node-pdfreader build status](https://frozen-fortress-98851.herokuapp.com/telligro/orpa-nodes/8/badge?subject=build)](https://travis-ci.org/telligro/orpa-nodes) [![npm (scoped)](https://img.shields.io/npm/v/@torpadev/opal-node-pdfreader.svg)](https://www.npmjs.com/package/@torpadev/opal-node-pdfreader)
+## opal-node-pdfreader
 ### This module is part of the OPAL framework
 #### Nodes: 
 * read pdf

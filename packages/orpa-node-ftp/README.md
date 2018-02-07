@@ -1,4 +1,5 @@
-## orpa-node-ftp [![orpa-node-ftp build status](https://frozen-fortress-98851.herokuapp.com/telligro/orpa-nodes/4/badge?subject=build)](https://travis-ci.org/telligro/orpa-nodes)
+[![orpa-node-ftp build status](https://frozen-fortress-98851.herokuapp.com/telligro/orpa-nodes/4/badge?subject=build)](https://travis-ci.org/telligro/orpa-nodes) [![npm (scoped)](https://img.shields.io/npm/v/@torpadev/orpa-node-ftp.svg)](https://www.npmjs.com/package/@torpadev/orpa-node-ftp)
+## orpa-node-ftp
 ### This module is part of the OPAL framework
 ### Nodes: 
 * ftp service

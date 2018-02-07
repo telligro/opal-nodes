@@ -1,4 +1,5 @@
-## orpa-node-control-flow [![orpa-node-control-flow build status](https://frozen-fortress-98851.herokuapp.com/telligro/orpa-nodes/6/badge?subject=build)](https://travis-ci.org/telligro/orpa-nodes)
+[![orpa-node-control-flow build status](https://frozen-fortress-98851.herokuapp.com/telligro/orpa-nodes/6/badge?subject=build)](https://travis-ci.org/telligro/orpa-nodes) [![npm (scoped)](https://img.shields.io/npm/v/@torpadev/orpa-node-control-flow.svg)](https://www.npmjs.com/package/@torpadev/orpa-node-control-flow)
+## orpa-node-control-flow
 ### This module is part of the OPAL framework
 ### Nodes: 
 * orpa loops
