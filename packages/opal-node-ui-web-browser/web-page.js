@@ -17,10 +17,6 @@
  *  along with OPAL.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- *
- * @param {*} RED
- */
 module.exports = function(RED) {
     'use strict';
     let q = require('q');
@@ -31,33 +27,30 @@ module.exports = function(RED) {
     const By = webdriver.By;
     const until = webdriver.until;
 
-    // console.log('Registering Plugin Service')
-    // const FinderPluginSvc = require('@torpadev/orpa-page-object-finder').FinderPluginSvc;
-    // const Dispatcher = require('@torpadev/orpa-page-object-finder').Dispatcher;
-    // console.log('Registered Plugin Service: Page Object Finder');
-    // // const finderSvc = new FinderPluginSvc();
-    // const dispatcher = new Dispatcher();
-    // dispatcher.registerObject("FinderPluginSvc", FinderPluginSvc);
-    // // console.log(finderSvc);
-    // console.log(dispatcher);
-    // try{
-    //     dispatcher.start(9010);
-    // }catch(ex){
-    //     console.error(ex);
-    // }
+    console.log('Registering Plugin Service');
+    const FinderPluginSvc = require('@telligro/opal-page-object-finder').FinderPluginSvc;
+    const Dispatcher = require('@telligro/opal-page-object-finder').Dispatcher;
+    console.log('Registered Plugin Service: Page Object Finder');
+    // const finderSvc = new FinderPluginSvc();
+    const dispatcher = new Dispatcher();
+    dispatcher.registerObject('FinderPluginSvc', FinderPluginSvc);
+    // console.log(finderSvc);
+    console.log(dispatcher);
+    try {
+        dispatcher.start(9010);
+    } catch (ex) {
+        console.error(ex);
+    }
 
-    // RED.comms.publish('object:finder', 'How is the view ?');
-    function ConfigureWebPageElements(n) {
+
+    function ConfigureWebPages(n) {
         RED.nodes.createNode(this, n);
-
         this.usecount = 0;
-
+        this.url = n.url;
         this.name = n.name;
-        this.expression = n.expression;
-        this.selector = n.selector;
-        this.page = n.page;
-        this.markers = n.markers;
         this.framePath = n.framePath;
+        this.elements = n.elements;
+        this.markers = n.markers;
 
         let node = this;
         // node.log(n);
@@ -72,7 +65,7 @@ module.exports = function(RED) {
         };
     }
 
-    RED.nodes.registerType('web-element', ConfigureWebPageElements);
+    RED.nodes.registerType('web-page', ConfigureWebPages);
 
     RED.httpAdmin.get('/plugins/*', function(req, res) {
         let options = {
@@ -81,5 +74,11 @@ module.exports = function(RED) {
         };
         res.sendFile(req.params[0], options);
     });
+    RED.httpAdmin.get('/vendor/*', function(req, res) {
+        let options = {
+            root: __dirname + '/vendor/',
+            dotfiles: 'deny',
+        };
+        res.sendFile(req.params[0], options);
+    });
 };
-

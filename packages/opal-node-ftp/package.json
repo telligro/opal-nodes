@@ -1,23 +1,25 @@
 {
-	"name": "@torpadev/orpa-node-database",
+	"name": "@telligro/opal-node-ftp",
 	"version": "0.2.2",
-	"description": "Database Read/Write nodes for OPAL",
+	"description": "FTP Read/Write nodes for OPAL",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/telligro/opal-nodes.git"
+	},
 	"dependencies": {
 		"check-types": ">=7.3.0",
 		"fs-extra": ">=4.0.2",
-		"is-utf8": ">=0.2.1",
-		"mysql": "^2.13.0",
-		"q": ">=1.5.0",
-		"verror": "^1.10.0"
+		"ftp": "^0.3.10",
+		"is-utf8": ">=0.2.1"
 	},
 	"license": "GPL-3.0",
 	"keywords": [
 		"node-red",
-		"database"
+		"ftp"
 	],
 	"node-red": {
 		"nodes": {
-			"dbprocess": "dbprocess.js"
+			"ftpprocess": "ftpprocess.js"
 		}
 	},
 	"engines": {

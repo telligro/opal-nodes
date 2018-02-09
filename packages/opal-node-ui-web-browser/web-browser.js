@@ -1,5 +1,6 @@
 /**
  *  Copyright Telligro Pte Ltd 2017
+ *  Copyright DUONG Dinh Cuong, cuong3ihut@gmail.com, 2016
  *
  *  This file is part of OPAL.
  *

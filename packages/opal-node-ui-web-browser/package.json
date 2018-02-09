@@ -1,9 +1,13 @@
 {
-	"name": "@torpadev/orpa-node-selenium-webdriver",
+	"name": "@telligro/opal-node-ui-web-browser",
 	"version": "0.2.5",
-	"description": "selenium-webdriver nodes for OPAL. Inspired by node-red-node-selenium-webdriver",
+	"description": "Web Browser UI nodes for OPAL",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/telligro/opal-nodes.git"
+	},
 	"dependencies": {
-		"@torpadev/orpa-page-object-finder": "~0.2.0",
+		"@telligro/opal-page-object-finder": "~0.3.0",
 		"easyimage": ">=2.1.0",
 		"fast-deep-equal": "^1.0.0",
 		"fs-extra": ">=0.30.0",
@@ -18,7 +22,7 @@
 	],
 	"node-red": {
 		"nodes": {
-			"selenium-webdriver": "selenium-webdriver.js",
+			"web-browser": "web-browser.js",
 			"web-element": "web-element.js",
 			"web-page": "web-page.js"
 		}
@@ -27,8 +31,8 @@
 		"node": ">= 8.7.0"
 	},
 	"author": {
-		"name": "parodot",
-		"email": "orpayuser@yahoo.com"
+		"name": "Shiva Kumar Madhavan",
+		"email": "shiva.madhavan@gmail.com"
 	},
 	"scripts": {
 		"build-debug": "browserify ./ServiceManager.js:ServiceManager -d > plugins/servicemanager.bundle.js",

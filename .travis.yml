@@ -1,13 +1,13 @@
 sudo: false
 language: node_js
 env:
-- CXX="g++-4.8" NODE_FOLDER=packages/orpa-node-msexcel
-- CXX="g++-4.8" NODE_FOLDER=packages/orpa-node-database
-- CXX="g++-4.8" NODE_FOLDER=packages/orpa-node-email
-- CXX="g++-4.8" NODE_FOLDER=packages/orpa-node-ftp
-- CXX="g++-4.8" NODE_FOLDER=packages/orpa-node-soap
-- CXX="g++-4.8" NODE_FOLDER=packages/orpa-node-control-flow
-- CXX="g++-4.8" NODE_FOLDER=packages/orpa-node-selenium-webdriver
+- CXX="g++-4.8" NODE_FOLDER=packages/opal-node-msexcel
+- CXX="g++-4.8" NODE_FOLDER=packages/opal-node-database
+- CXX="g++-4.8" NODE_FOLDER=packages/opal-node-email
+- CXX="g++-4.8" NODE_FOLDER=packages/opal-node-ftp
+- CXX="g++-4.8" NODE_FOLDER=packages/opal-node-soap
+- CXX="g++-4.8" NODE_FOLDER=packages/opal-node-control-flow
+- CXX="g++-4.8" NODE_FOLDER=packages/opal-node-ui-web-browser
 - CXX="g++-4.8" NODE_FOLDER=packages/opal-node-pdfreader
 addons:
   apt:

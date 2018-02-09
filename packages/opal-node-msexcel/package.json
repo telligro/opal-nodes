@@ -1,7 +1,11 @@
 {
-  "name": "@torpadev/orpa-node-msexcel",
+  "name": "@telligro/opal-node-msexcel",
   "version": "0.2.2",
   "description": "MS Excel Read/Write nodes for OPAL",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/telligro/opal-nodes.git"
+  },
   "dependencies": {
     "check-types": ">=7.3.0",
     "fs-extra": ">=4.0.2",

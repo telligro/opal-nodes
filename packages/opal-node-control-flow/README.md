@@ -1,8 +1,8 @@
-[![orpa-node-control-flow build status](https://frozen-fortress-98851.herokuapp.com/telligro/orpa-nodes/6/badge?subject=build)](https://travis-ci.org/telligro/orpa-nodes) [![npm (scoped)](https://img.shields.io/npm/v/@torpadev/orpa-node-control-flow.svg)](https://www.npmjs.com/package/@torpadev/orpa-node-control-flow)
-## orpa-node-control-flow
+[![opal-node-control-flow build status](https://frozen-fortress-98851.herokuapp.com/telligro/opal-nodes/6/badge?subject=build)](https://travis-ci.org/telligro/opal-nodes) [![npm (scoped)](https://img.shields.io/npm/v/@telligro/opal-node-control-flow.svg)](https://www.npmjs.com/package/@telligro/opal-node-control-flow)
+## opal-node-control-flow
 ### This module is part of the OPAL framework
 ### Nodes: 
-* orpa loops
+* opal loops
 ### Loops
 - [ ] Provides `for-loop`, `foreach-loop`, `while-loop` functionality. THe loop node provides 2 output ports. The next item `output` and the `done` output port. Connect the nodes that are to be in the loop body to the `next` output port. At the end of the loop connect the last action to the input port of the loop node. Connect the `done` output port to the nodes that are to be executed after the loops ends. 
 #### Inputs:

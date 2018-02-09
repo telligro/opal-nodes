@@ -7,6 +7,10 @@
     "poplib": "^0.1.7"
   },
   "description": "OPAL nodes to send and receive emails",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/telligro/opal-nodes.git"
+  },
   "directories": {},
   "keywords": [
     "node-red",
@@ -22,7 +26,7 @@
       "email": "balaraman@gmail.com"
     }
   ],
-  "name": "@torpadev/orpa-node-email",
+  "name": "@telligro/opal-node-email",
   "node-red": {
     "nodes": {
       "email": "emailprocess.js"

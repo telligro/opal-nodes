@@ -1,21 +1,25 @@
 {
-	"name": "@torpadev/orpa-node-ftp",
+	"name": "@telligro/opal-node-soap",
 	"version": "0.2.2",
-	"description": "FTP Read/Write nodes for OPAL",
+	"description": "SOAP Read/Write nodes for OPAL",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/telligro/opal-nodes.git"
+	},
 	"dependencies": {
 		"check-types": ">=7.3.0",
 		"fs-extra": ">=4.0.2",
-		"ftp": "^0.3.10",
-		"is-utf8": ">=0.2.1"
+		"is-utf8": ">=0.2.1",
+		"strong-soap": "^1.2.3"
 	},
 	"license": "GPL-3.0",
 	"keywords": [
 		"node-red",
-		"ftp"
+		"soap"
 	],
 	"node-red": {
 		"nodes": {
-			"ftpprocess": "ftpprocess.js"
+			"soapprocess": "soapprocess.js"
 		}
 	},
 	"engines": {

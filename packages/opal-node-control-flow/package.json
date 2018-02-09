@@ -1,20 +1,24 @@
 {
-  "name": "@torpadev/orpa-node-control-flow",
+  "name": "@telligro/opal-node-control-flow",
   "version": "0.2.2",
-  "description": "Set of nodes to aid with control flow constructs in orpa",
+  "description": "Set of nodes to aid with control flow constructs in opal",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/telligro/opal-nodes.git"
+  },
   "main": "init.js",
   "scripts": {
     "lint": "gulp lint"
   },
   "keywords": [
-    "orpa",
+    "opal",
     "node-red",
     "control",
     "flow"
   ],
   "node-red": {
     "nodes": {
-      "orpa-loops": "orpa-loops.js"
+      "opal-loops": "opal-loops.js"
     }
   },
   "engines": {

@@ -395,7 +395,7 @@ module.exports = function(RED) {
         });
     }
 
-    RED.nodes.registerType('orpa-loops', LoopNode);
+    RED.nodes.registerType('opal-loops', LoopNode);
 };
 
 

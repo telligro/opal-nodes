@@ -1,5 +1,5 @@
-[![orpa-node-msexcel build status](https://frozen-fortress-98851.herokuapp.com/telligro/orpa-nodes/1/badge?subject=build)](https://travis-ci.org/telligro/orpa-nodes) [![npm (scoped)](https://img.shields.io/npm/v/@torpadev/orpa-node-msexcel.svg)](https://www.npmjs.com/package/@torpadev/orpa-node-msexcel)
-## orpa-node-msexcel
+[![opal-node-msexcel build status](https://frozen-fortress-98851.herokuapp.com/telligro/opal-nodes/1/badge?subject=build)](https://travis-ci.org/telligro/opal-nodes) [![npm (scoped)](https://img.shields.io/npm/v/@telligro/opal-node-msexcel.svg)](https://www.npmjs.com/package/@telligro/opal-node-msexcel)
+## opal-node-msexcel
 ### This module is part of the OPAL framework
 #### Nodes: 
 * read excel 
