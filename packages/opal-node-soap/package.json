@@ -1,6 +1,6 @@
 {
 	"name": "@telligro/opal-node-soap",
-	"version": "0.2.2",
+	"version": "0.3.0",
 	"description": "SOAP Read/Write nodes for OPAL",
 	"repository": {
 		"type": "git",

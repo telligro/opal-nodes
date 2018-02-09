@@ -1,6 +1,6 @@
 {
 	"name": "@telligro/opal-node-ui-web-browser",
-	"version": "0.2.5",
+	"version": "0.3.0",
 	"description": "Web Browser UI nodes for OPAL",
 	"repository": {
 		"type": "git",
