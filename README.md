@@ -1,4 +1,7 @@
 [![Build Status](https://travis-ci.org/telligro/orpa-nodes.svg?branch=master)](https://travis-ci.org/telligro/orpa-nodes) [![license](https://img.shields.io/github/license/telligro/orpa-nodes.svg)](LICENSE)
+
+#### **Note:** All instances of *ORPA* will be renamed to *OPAL* in the upcoming update. Current version will remain accessible.
+
 # orpa-nodes
 Contains the nodes that are part of the OPAL Framework.   
 Individual README's can be found at ```packages/<NODE_NAME>```. Links below.
