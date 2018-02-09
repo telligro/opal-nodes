@@ -41,5 +41,8 @@
 	},
 	"scripts": {
 		"lint": "gulp lint"
+	},
+	"publishConfig": {
+		"access": "public"
 	}
 }

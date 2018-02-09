@@ -43,5 +43,8 @@
   "scripts": {
     "lint": "gulp lint"
   },
-  "version": "0.2.2"
+  "version": "0.2.2",
+  "publishConfig": {
+    "access": "public"
+  }
 }
