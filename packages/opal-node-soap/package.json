@@ -14,7 +14,8 @@
 	},
 	"license": "GPL-3.0",
 	"keywords": [
-		"node-red",
+		"opal",
+		"webservices",
 		"soap"
 	],
 	"node-red": {
