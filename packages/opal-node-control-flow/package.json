@@ -1,6 +1,6 @@
 {
   "name": "@telligro/opal-node-control-flow",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Set of nodes to aid with control flow constructs in opal",
   "repository": {
     "type": "git",
