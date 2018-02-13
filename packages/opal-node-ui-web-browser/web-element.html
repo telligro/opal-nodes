@@ -227,7 +227,7 @@
             //TODO: DRY
             async function initFinderConnection() {
                 if (window.backendElement === undefined) {
-                    window.backendElement = await Services.serviceManager.setEndpoint(window.location.hostname).createRemoteService('FinderPluginSvc');
+                    window.backendElement = await Services.serviceManager.setEndpoint(window.location.hostname).createRemoteService('FinderPluginSvcElm');
                     console.log('Created');
                 }
                 window.backendElement.on('ObjectFound', result => {

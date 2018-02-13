@@ -29,11 +29,11 @@ module.exports = function(RED) {
 
     console.log('Registering Plugin Service');
     const FinderPluginSvc = require('@telligro/opal-page-object-finder').FinderPluginSvc;
-    const Dispatcher = require('@telligro/opal-page-object-finder').Dispatcher;
+    const dispatcher = require('@telligro/opal-page-object-finder').Dispatcher;
     console.log('Registered Plugin Service: Page Object Finder');
     // const finderSvc = new FinderPluginSvc();
-    const dispatcher = new Dispatcher();
-    dispatcher.registerObject('FinderPluginSvc', FinderPluginSvc);
+    // const dispatcher = new Dispatcher();
+    dispatcher.registerObject('FinderPluginSvcPage', FinderPluginSvc);
     // console.log(finderSvc);
     console.log(dispatcher);
     try {
