@@ -1,4 +1,7 @@
 [![Build Status](https://travis-ci.org/telligro/opal-nodes.svg?branch=master)](https://travis-ci.org/telligro/opal-nodes) [![license](https://img.shields.io/github/license/telligro/opal-nodes.svg)](LICENSE)
+
+##### Note: These nodes work with opal-node-red fork only. Refer to [Getting Started](#getting-started) for usage instructions.
+
 # opal-nodes
 Contains the nodes that are part of the OPAL Framework.   
 Individual README's can be found at ```packages/<NODE_NAME>```. Links below.
