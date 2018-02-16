@@ -9,18 +9,19 @@
 		<input type="hidden" id="node-input-locationType" />
 	</div>
 	<div class="form-row">
-		<label for="node-input-sheet"><i class="fa fa-file-text"></i> <span>Sheet</span></label>
-		<input type="text" id="node-input-sheet" style="width:70%">
-		<input type="hidden" id="node-input-sheetType" />
-	</div>
-	<div class="form-row">
 		<label for="node-input-mode"><i class="fa fa-cog"></i> <span>Read Mode</span></label>
 		<select id="node-input-mode" style="width:125px !important">
             <option value="full">Full Contents</option>
             <option value="rows">Rows</option>
             <option value="cols">Columns</option>
-            <option value="region">Region</option>
+			<option value="region">Region</option>
+			<option value="metadata">Metadata</option>
         </select>
+	</div>
+	<div class="form-row sheet-row" id="sheet-row">
+		<label for="node-input-sheet"><i class="fa fa-file-text"></i> <span>Sheet</span></label>
+		<input type="text" id="node-input-sheet" style="width:70%">
+		<input type="hidden" id="node-input-sheetType" />
 	</div>
 	<div class="form-row read-mode-row" id="read-mode-row-rows">
 		<label for="node-input-rows"><i class="fa fa-bars"></i> <span>Rows</span></label>
@@ -105,6 +106,7 @@
 					<li><b>Columns</b> - A comma separated list of Names(e.g. A, B, AA etc) of the columns that are to be fetched</li>
 					<li><b>Region</b> - A region notation as deinfed by this MSDN article (<a href="https://msdn.microsoft.com/en-us/library/bb211395(v=office.12).aspx"
 						 target="blank">Range Notation<</a>). Only single range expression is supported.</li>
+					<li><b>Metadata</b> - A collection of meta-data that included sheets in the books and propereties of the book</li>
 				</ul>
 			</li>
 			<li><a>Output Formats</a>: The output of the read operation can be a Simple JSON (Array of Arrays or Colmn Header indexed
@@ -238,14 +240,25 @@
 						$('#read-mode-row-cols').show();
 						$('#read-mode-row-region').hide();
 						$('.output-json-row').show();
+						$('.sheet-row').show();
 						break;
 					case 'region':
 						$('#read-mode-row-rows').hide();
 						$('#read-mode-row-cols').hide();
 						$('#read-mode-row-region').show();
 						$('.output-json-row').show();
+						$('.sheet-row').show();
 						break;
+					case 'metadata':
+						$('#read-mode-row-rows').hide();
+						$('#read-mode-row-cols').hide();
+						$('#read-mode-row-region').hide();
+						$('.sheet-row, .read-mode-row, .output-json-row').hide();
+						// $('#node-input-sheet').attr('readonly', 'readonly');
+						// $('.output-json-row').show();
+						break;	
 					default:
+						$('.sheet-row').show();
 						$('.read-mode-row').hide();
 						$('.output-json-row').show();
 				}

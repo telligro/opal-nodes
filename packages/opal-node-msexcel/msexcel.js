@@ -49,6 +49,11 @@ module.exports = function(RED) {
                 sheetStubs: true,
             };
 
+            if (msg.mode === 'metadata') {
+                args.bookProps = true;
+                args.bookSheets = true;
+            }
+
             try {
                 workbook = xlsx.readFileSync(msg.location, args);
             } catch (ex) {
@@ -513,8 +518,12 @@ module.exports = function(RED) {
                 return;
             }// Check for workbook
 
-            if (check.assigned(msgParams.sheet)) {
-                if (check.undefined(workbook.Sheets[msgParams.sheet])) {
+            if (check.assigned(msgParams.sheet) || msgParams.mode === 'metadata') {
+                if (msgParams.mode === 'metadata') {
+                    msg.payload = workbook;
+                    node.send(msg);
+                    return;
+                } else if (check.undefined(workbook.Sheets[msgParams.sheet])) {
                     node.log(workbook.SheetNames[0]);
                     node.log(JSON.stringify(workbook.Sheets));
                     sendError(node, msg, 'Missing Sheet [%s] in Workbook: %s', msgParams.sheet, msgParams.location);
