@@ -8,11 +8,8 @@
   },
   "dependencies": {
     "check-types": ">=7.3.0",
-    "fs-extra": ">=4.0.2",
-    "is-utf8": ">=0.2.1",
     "moment": "^2.19.1",
-    "q": ">=1.5.0",
-    "xlsx": ">=0.11.5"
+    "xlsx": "~0.12.0"
   },
   "license": "GPL-3.0",
   "keywords": [
