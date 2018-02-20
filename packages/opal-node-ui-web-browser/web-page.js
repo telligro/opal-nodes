@@ -39,7 +39,7 @@ module.exports = function(RED) {
     try {
         dispatcher.start(9010);
     } catch (ex) {
-        console.error(ex);
+        // console.error(ex);
     }
 
 
