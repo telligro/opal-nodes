@@ -1,6 +1,6 @@
 {
 	"name": "opal-node-ui-web-browser",
-	"version": "0.3.3",
+	"version": "0.3.4",
 	"description": "Web Browser UI nodes for OPAL",
 	"repository": {
 		"type": "git",
