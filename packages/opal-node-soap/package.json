@@ -1,5 +1,5 @@
 {
-	"name": "@telligro/opal-node-soap",
+	"name": "opal-node-soap",
 	"version": "0.3.1",
 	"description": "SOAP Read/Write nodes for OPAL",
 	"repository": {

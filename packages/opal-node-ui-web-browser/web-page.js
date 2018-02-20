@@ -28,8 +28,8 @@ module.exports = function(RED) {
     const until = webdriver.until;
 
     console.log('Registering Plugin Service');
-    const FinderPluginSvc = require('@telligro/opal-page-object-finder').FinderPluginSvc;
-    const dispatcher = require('@telligro/opal-page-object-finder').Dispatcher;
+    const FinderPluginSvc = require('opal-page-object-finder').FinderPluginSvc;
+    const dispatcher = require('opal-page-object-finder').Dispatcher;
     console.log('Registered Plugin Service: Page Object Finder');
     // const finderSvc = new FinderPluginSvc();
     // const dispatcher = new Dispatcher();
