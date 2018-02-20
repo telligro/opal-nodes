@@ -1,6 +1,6 @@
 {
 	"name": "opal-node-ftp",
-	"version": "0.3.1",
+	"version": "0.3.2",
 	"description": "FTP Read/Write nodes for OPAL",
 	"repository": {
 		"type": "git",

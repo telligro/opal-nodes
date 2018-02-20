@@ -1,6 +1,6 @@
 {
   "name": "opal-node-msexcel",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "MS Excel Read/Write nodes for OPAL",
   "repository": {
     "type": "git",

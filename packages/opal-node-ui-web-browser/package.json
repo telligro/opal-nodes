@@ -1,16 +1,16 @@
 {
 	"name": "opal-node-ui-web-browser",
-	"version": "0.3.1",
+	"version": "0.3.2",
 	"description": "Web Browser UI nodes for OPAL",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/telligro/opal-nodes.git"
 	},
 	"dependencies": {
-		"opal-page-object-finder": "~0.3.0",
 		"easyimage": ">=2.1.0",
 		"fast-deep-equal": "^1.0.0",
 		"fs-extra": ">=0.30.0",
+		"opal-page-object-finder": "~0.3.0",
 		"q": "^1.5.1",
 		"selenium-webdriver": ">=3.6.0",
 		"verror": "^1.10.0"
