@@ -43,7 +43,7 @@ module.exports = function(RED) {
     const webdriver = require('selenium-webdriver');
     const By = webdriver.By;
     const until = webdriver.until;
-    // const Key = webdriver.Key;
+    const Key = webdriver.Key;
     let jQueryMin;
     try {
         jQueryMin = fs.readFileSync(path.join(__dirname, 'vendor', 'jquery-3.2.1.min.js'), {encoding: 'utf8'});
