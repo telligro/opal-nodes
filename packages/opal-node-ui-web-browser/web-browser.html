@@ -583,15 +583,23 @@
 			return this.name ? "node_label_italic" : "";
 		},
 		oneditprepare: function () {
-
+			var controlKeys = { value: 'controlKeys', options: ['ADD', 'ALT', 'ARROW_DOWN', 'ARROW_LEFT', 'ARROW_RIGHT', 
+			'ARROW_UP', 'BACK_SPACE', 'CANCEL', 'CLEAR', 'COMMAND', 'CONTROL', 'DECIMAL',
+			'DELETE', 'DIVIDE', 'DOWN', 'END', 'ENTER', 'EQUALS', 'ESCAPE',
+			'F1', 'F10', 'F11', 'F12', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9',
+			'HELP', 'HOME', 'INSERT', 'LEFT', 'META', 'MULTIPLY', 'NULL', 'NUMPAD0',
+			'NUMPAD1', 'NUMPAD2', 'NUMPAD3', 'NUMPAD4', 'NUMPAD5', 'NUMPAD6', 'NUMPAD7',
+			'NUMPAD8', 'NUMPAD9', 'PAGE_DOWN', 'PAGE_UP', 'PAUSE', 'RETURN', 'RIGHT',
+			'SEMICOLON', 'SEPARATOR', 'SHIFT', 'SPACE', 'SUBTRACT', 'TAB', 'UP', 'ZENKAKU_HANKAKU'], label: 'control keys', hasValue: true };
 			makeTypedInputFields([
-				{ name: 'text', type: 'textType', valid: ['msg', 'global', 'flow', 'str'], inst: this.textType, default: 'str' }
+				{ name: 'text', type: 'textType', valid: ['msg', 'global', 'flow', 'str', controlKeys], inst: this.textType, default: 'str' }
 			]);
 			
 			console.log('oneditprepare1 %s', this.target);
 			const that = this;
 			RED.customUtil.handleTargetUpdate(that);
-			
+			$('.red-ui-typedInput-options').each((i, el) => { $(el).css('max-height', '70%'); });
+			$('.red-ui-typedInput-options').each((i, el) => { $(el).css('overflow-y', 'auto'); });
 			console.log('oneditprepare2 %s', this.target);
 		},
 		oneditsave:function(){

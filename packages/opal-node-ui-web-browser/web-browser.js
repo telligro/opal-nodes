@@ -636,6 +636,10 @@ module.exports = function(RED) {
     function sendKeysNode(node, msg) {
         try {
             let value = msg.value;
+            console.log(node.textType);
+            if (node.textType === 'controlKeys'){
+                value = 'Key.' + value;
+            }
             console.log('Sending keys %s', value);
             if (value.indexOf('Key.') != -1) {
                 value = value.split(',').map((token) => {
