@@ -637,7 +637,7 @@ module.exports = function(RED) {
         try {
             let value = msg.value;
             console.log(node.textType);
-            if (node.textType === 'controlKeys'){
+            if (node.textType === 'controlKeys') {
                 value = 'Key.' + value;
             }
             console.log('Sending keys %s', value);
