@@ -638,9 +638,13 @@
 		<input type="text" id="node-input-waitfor" value="00">
 	</div>
 	<div class="form-row">		
+		<input type="checkbox" id="node-input-useSubmit" style="display: inline-block; width: auto; vertical-align: top;">
+		<label for="node-input-useSubmit" style="width: 70%"> <span>Use Submit if Button is of type Submit</span></label>
+	</div>
+	<!-- <div class="form-row">		
 		<input type="checkbox" id="node-input-clickon" style="display: inline-block; width: auto; vertical-align: top;">
 		<label for="node-input-clickon" style="width: 70%"> <span>Require manual approval on click to continue</span></label>
-	</div>
+	</div> -->
 </script>
 
 <script type="text/x-red" data-help-name="click-on">
@@ -686,6 +690,9 @@
 			},
 			clickon : {
 				value : false
+			},
+			useSubmit: {
+				value: true
 			}
 		},
 		color : "#d8bfd8",

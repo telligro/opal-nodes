@@ -242,11 +242,6 @@ module.exports = function(RED) {
                         }).then((rerr, res) => {
                             node.log('Identification completed');
                             console.log('Waiting for Element %s %s in %s ms', node.selector, node.target, node.timeout);
-                            // console.log(By);
-                            // console.log(By[node.selector]);
-                            console.log('rerr&res');
-                            console.log(rerr);
-                            console.log(res);
                             return node.sessionDriver.wait(until.elementLocated(By[node.selector](node.target)), node.timeout).catch(function(errorback) {
                                 node.log('Error in locating element:Catch');
                                 msg.error = {
@@ -260,13 +255,13 @@ module.exports = function(RED) {
                                     shape: 'ring',
                                     text: 'error',
                                 });
-                            }).then(function() {
+                            }).then(function(e1, e2) {
                                 if (msg.error) {
                                     node.log('Error in locating element:Catch-then');
-
                                     sendErrorMsg(node, msg, 'Error in locating element:Catch-then', 'error');
                                 } else {
                                     msg.element = node.sessionDriver.findElement(By[node.selector](node.target));
+                                    node.log(util.format('Element Found by %s : %s', node.selector, node.target));
                                     if (typeof (callback) !== 'undefined') {
                                         // node.status({});
                                         // We are passing a promise (msg.element) here
@@ -614,8 +609,9 @@ module.exports = function(RED) {
     };
 
     function clickOnNode(node, msg) {
+        console.log('Clicking Now');
         try {
-            msg.element.click().then(function() {
+            function clickDone() {
                 if (!msg.error) {
                     node.status({
                         fill: 'green',
@@ -625,8 +621,19 @@ module.exports = function(RED) {
                     delete msg.error;
                     node.send(msg);
                 }
-            }).catch(function(errorback) {
-                sendErrorMsg(node, msg, errorback.message, 'error');
+            }
+            msg.element.getAttribute('type').then((elmType)=>{
+                console.log('Got Aattribute type %s, useSubmit %s', elmType, node.useSubmit);
+                if (node.useSubmit && elmType === 'submit') {
+                    console.log('Using Submit on type submit');
+                    msg.element.submit().then(clickDone).catch(function(errorback) {
+                        sendErrorMsg(node, msg, errorback.message, 'error');
+                    });
+                } else {
+                    msg.element.click().then(clickDone).catch(function(errorback) {
+                        sendErrorMsg(node, msg, errorback.message, 'error');
+                    });
+                }
             });
         } catch (ex) {
             node.send(msg);
@@ -1016,10 +1023,13 @@ module.exports = function(RED) {
         this.framePath = this.pageObj.framePath && this.pageObj.framePath != '' && this.pageObj.framePath != 'Main Frame' ? this.pageObj.framePath : undefined;
         this.framePath = this.targetObj.framePath && this.targetObj.framePath != '' && this.targetObj.framePath != 'Main Frame' ? this.targetObj.framePath : this.framePath;
         this.waitfor = n.waitfor;
+        this.useSubmit = n.useSubmit;
         this.clickon = n.clickon;
         let node = this;
         this.on('input', function(msg) {
             waitUntilElementLocated(node, msg, function(element) {
+                node.log('Element Found');
+                console.log('node.clickon', node.clickon);
                 if (node.clickon) {
                     if (typeof (msg.payload) !== 'undefined') {
                         node.___msgs = msg;
@@ -1241,7 +1251,7 @@ module.exports = function(RED) {
         let node = this;
         this.on('input', function(msg) {
             waitUntilElementLocated(node, msg, function(element) {
-                console.log('Element Found');
+                node.log('Element Found');
                 runScriptNode(node, msg);
             });
         });
