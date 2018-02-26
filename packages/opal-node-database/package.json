@@ -1,6 +1,6 @@
 {
 	"name": "opal-node-database",
-	"version": "0.3.2",
+	"version": "0.3.3",
 	"description": "Database Read/Write nodes for OPAL",
 	"repository": {
 		"type": "git",
