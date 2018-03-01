@@ -10,7 +10,7 @@
 		"easyimage": ">=2.1.0",
 		"fast-deep-equal": "^1.0.0",
 		"fs-extra": ">=0.30.0",
-		"opal-page-object-finder": "~0.3.0",
+		"opal-page-object-finder": "~0.4.0",
 		"q": "^1.5.1",
 		"selenium-webdriver": ">=3.6.0",
 		"verror": "^1.10.0"
