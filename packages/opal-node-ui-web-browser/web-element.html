@@ -277,10 +277,15 @@
                 console.log('NO-callerContext');
             }
             $('#node-config-input-expressionMode').change((e)=>{
-                console.log('expressionMode onchange',$(e.target).val());
                 updateElmExpression();
-                // updateElmProps(node.elmProps);
             });
+
+            $('#node-config-input-expression').change((e)=>{
+                if($('#node-config-input-expressionMode').val()==='custom'){
+                    $('#node-config-input-expressionCustom').val($('#node-config-input-expression').val());
+                }
+            });
+
             $("#elmPropsGrid").show();
             $("#elmPropsGrid").jsGrid({
                 width: "100%",
