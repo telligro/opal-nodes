@@ -1,6 +1,6 @@
 {
   "name": "opal-node-pdfreader",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "PDF Reader nodes for OPAL",
   "repository": {
     "type": "git",
