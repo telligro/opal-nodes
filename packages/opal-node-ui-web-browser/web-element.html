@@ -1,8 +1,12 @@
 <script type="text/javascript" src="plugins/app.js"></script>
 <script type="text/javascript" src="vendor/wgxpath.install.js"></script>
 <script type="text/javascript" src="vendor/parsley.min.js"></script>
+<link rel="stylesheet" href="plugins/css/style-web-elm.css">
 <link rel="stylesheet" href="vendor/parsley.css">
 <link rel="stylesheet" href="plugins/css/style.css">
+<link type="text/css" rel="stylesheet" href="vendor/jsgrid/jsgrid.min.css" />
+<link type="text/css" rel="stylesheet" href="vendor/jsgrid/jsgrid-theme.min.css" />
+<script type="text/javascript" src="vendor/jsgrid/jsgrid.min.js"></script>
 <script type="text/x-red" data-template-name="web-element">
     <div id="errInvalidNote" class="bs-callout bs-callout-warning hidden">
         <h5>Invalid:</h5>
@@ -64,18 +68,30 @@
                 </label>
                  <div style="display: inline-block; position: relative; width: 70%; height: 20px;">
                     <div style="position: absolute; left: 0px; right: 40px;">
-                <input class="input-append-left" type="text" id="node-config-input-expression" data-parsley-errors-messages-disabled
-                    data-parsley-required
-                    data-parsley-required-message="Expression is required"
-                    placeholder="Expression" style="width:100%">
+                        <input class="input-append-left" type="text" id="node-config-input-expression" data-parsley-errors-messages-disabled
+                        data-parsley-required
+                        data-parsley-required-message="Expression is required"
+                        placeholder="Expression" style="width:100%">
+
                     </div>
-                <a id="plugin-command-obj-finder" class="editor-button" style="position: absolute; right: 0px; top: 0px;">
-                    <i style="color:#43a047" class="fa fa-search"></i>
-                </a>
-                <!-- <a id="plugin-command-obj-finder-url-new" class="editor-button">
-                    <i style="color:#43a047" class="fa fa-search-plus"></i>
-                </a> -->
+                    <a id="plugin-command-obj-finder" class="editor-button" style="position: absolute; right: 0px; top: 0px;">
+                        <i style="color:#43a047" class="fa fa-search"></i>
+                    </a>
+                    <!-- <a id="plugin-command-obj-finder-url-new" class="editor-button">
+                        <i style="color:#43a047" class="fa fa-search-plus"></i>
+                    </a> -->
+                </div>
             </div>
+            <div class="form-row">
+                <label for="node-config-input-expressionMode">
+                    <i class="fa fa-cog"></i>
+                    <span>Optimization</span>
+                </label>
+                <select id="node-config-input-expressionMode" style="width:125px !important">
+                    <option value="auto">auto</option>
+                    <option value="none">none</option>
+                    <option value="custom">custom</option>
+                </select>
             </div>
             <div class="form-row">
                 <label for="node-config-input-selector">
@@ -99,13 +115,19 @@
                     <span>Frame</span>
                 </label>
                 <input class="input-append-left" type="text" id="node-config-input-framePath" placeholder="BODY">
+                <input class="input-append-left" type="hidden" id="node-config-input-expressionFull" />
+                <input class="input-append-left" type="hidden" id="node-config-input-expressionShort" />
+                <input class="input-append-left" type="hidden" id="node-config-input-expressionCustom" />
             </div>
         </div>
+                                
+        <div id="elmPropsGrid"></div>
     </div>
 </script>
 <script type="text/javascript">
 //TODO: DRY
-   wgxpath.install({document: {}})
+   wgxpath.install({document: {}});
+//    let nodeElmAttrs = [];
     window.Parsley.on('field:validated', function(fieldInstance) {
         var ok = $('.parsley-error').length === 0;
         // $('.bs-callout-info').toggleClass('hidden', !ok);
@@ -121,6 +143,21 @@
         }
         $('#errInvalidNote').toggleClass('hidden', ok);
     });
+    
+    function getLastTokenParams(item) {
+        let lastTokenParams = [];
+        let lastToken = item.substring(item.lastIndexOf("/") + 1);
+        let paramParts = lastToken.match(/@(.*?)=/g);
+        if (paramParts != null && paramParts.length > 0) {
+            paramParts.forEach((paramPart) => {
+                lastTokenParams.push(paramPart.replace(/[@=]/g, ''));
+            });
+        }
+        return lastTokenParams;
+    }
+
+    
+    
 //TODO: DRY
     function getAllwebElements(ignoreList) {
         let webElements = [];
@@ -162,6 +199,7 @@
     //TODO: DRY
             const webUtils = require('WebNodeUtils').instance;
             const fastDeepEqual = require('fast-deep-equal');
+            
     window.finderActive = false;
     RED.nodes.registerType('web-element', {
         category: 'config',
@@ -175,6 +213,26 @@
                validate: function(value) {
                     console.log('V:URL %s', this.name); let exprElm = $('#node-config-input-expression'); exprElm.val(exprElm.val().trim()); return $('#node-config-input-expression').parsley().validate() === true;
                 }
+            },
+            expressionFull:{
+                value:""
+            },
+            expressionShort: {
+                value: ""
+            },
+            expressionCustom: {
+                value: ""
+            },
+            expressionMode: {
+                value: "auto",
+                required: true
+            },
+            elmProps: {
+                value: [{
+                    name: '',
+                    value: '',
+                    include: false
+                }]
             },
             selector: {
                 value: "id",
@@ -197,8 +255,8 @@
             return (this.name ? this.name : "body");
         },
         oneditprepare: async function () {
-                const Services = require('ServiceManager');
- 
+            const Services = require('ServiceManager');
+            
             var tabs = RED.tabs.create({
                 id: "node-config-web-element-tabs",
                 onchange: function (tab) {
@@ -211,16 +269,70 @@
                 label: this.name ? this.name : "Page Elements"
             });
             var node = this;
-            console.log(node);
-            console.log(node._def);
+            console.log('Elm Props', node.elmProps);
             if(node._def.callerContext){
                 console.log('callerContext:', node._def.callerContext);
                 $('#node-config-input-page').val(node._def.callerContext);
             }else{
                 console.log('NO-callerContext');
             }
+            $('#node-config-input-expressionMode').change((e)=>{
+                console.log('expressionMode onchange',$(e.target).val());
+                updateElmExpression();
+                // updateElmProps(node.elmProps);
+            });
+            $("#elmPropsGrid").show();
+            $("#elmPropsGrid").jsGrid({
+                width: "100%",
+                height: "300px",
+                autoload: true,
+                controller: {
+                    loadData: function (x) {
+                        return node.elmProps;
+                    }
+                },
 
-            
+                inserting: false,
+                editing: true,
+                sorting: false,
+                paging: false,
+                selecting: true,
+
+                rowClick: function (row) {
+                    row.item.includeProp = !row.item.includeProp;
+                    $("#elmPropsGrid").jsGrid("updateItem", row.item);
+                },
+
+                onItemUpdated: function (updated) {
+                    console.log('Updated ', updated.item);
+                    if (updated.item.includeProp) {
+                        $(updated.row).addClass('jsgrid-edit-row');
+                        updateXpath(updated.item, true);
+                    } else {
+                        $(updated.row).removeClass('jsgrid-edit-row');
+                        updateXpath(updated.item, false);
+                    }
+                },
+
+                onDataLoaded: function (loaded) {
+                    console.log('Loaded', loaded.data);
+                    $.each(loaded.data, (i, item) => {
+                        let row = $("#elmPropsGrid").jsGrid("rowByItem", item)
+                        if (item.includeProp) {
+                            $(row).addClass('jsgrid-edit-row');
+                        } else {
+                            $(row).removeClass('jsgrid-edit-row');
+                        }
+                    });
+
+                },
+
+                fields: [
+                    { title: "Property", name: "propName", type: "text", width: 100, validate: "required", css: "compact-prop-row prop-cell prop-cell-name", headercss: "prop-row-header", editing: false },
+                    { title: "Value", name: "propValue", type: "text", width: 200, css: "compact-prop-row prop-cell prop-cell-value", headercss: "prop-row-header", editing: false },
+                    { name: "includeProp", type: "checkbox", title: "Include", sorting: false, css: "compact-prop-row prop-cell prop-cell-control", headercss: "prop-row-header", editing: true },
+                ]
+            });
             // console.log('Elements: Requiring Service Manager');
 
             // console.log('Invoking createRemoteService');
@@ -237,6 +349,11 @@
                     if (resData && resData.target && resData.target.xpath) {
                            console.log('Got Result with element, Checking Similarity');
                         let elementExpr = resData.target.xpath.trim();
+                        let elementExprShort = resData.target.xpath.trim();
+                        let elementExprFull = resData.target.xpathFull.trim();
+                        let elementAttrs = resData.target.attributes;
+                        // if(elementAttrs)
+                        node.elmProps = elementAttrs;
                         let similarElement = getSimilarElement({expression: elementExpr},
                          node.id);
                         let containerPage = RED.nodes.node($('#node-config-input-page').val());
@@ -264,9 +381,7 @@
                             $('#addHereBtn').click(() => {
                                 console.log('addHere');
                                 $('#errPageMismatch').addClass('hidden');
-                                $('#node-config-input-expression').val(elementExpr);
-                                $('#node-config-input-selector').val('xpath');
-                                $('#node-config-input-expression').parsley().validate();
+                                updateExpression(elementExpr, 'xpath', elementAttrs, elementExprFull, elementExprShort);
                             });
                             $('#errPageMismatch').removeClass('hidden');
                         } else if(similarElement){
@@ -288,18 +403,14 @@
                             $('#continueAddingElement').click(() => {
                                 console.log('NotEditing', similarElement);
                                 $('#errExistingElement').addClass('hidden');
-                                $('#node-config-input-expression').val(elementExpr);
-                                $('#node-config-input-selector').val('xpath');
-                                $('#node-config-input-expression').parsley().validate();
+                                updateExpression(elementExpr, 'xpath', elementAttrs, elementExprFull, elementExprShort);
 
                             });
 
                             $('#errExistingElement').removeClass('hidden');
                         } else {
                             console.log('noSimilarElement')
-                            $('#node-config-input-expression').val(elementExpr);
-                            $('#node-config-input-selector').val('xpath');
-                            $('#node-config-input-expression').parsley().validate();
+                            updateExpression(elementExpr, 'xpath', elementAttrs, elementExprFull, elementExprShort);
                         }
 
                     }else{
@@ -313,6 +424,81 @@
                 });
                 return Promise.resolve();
             };
+
+            function updateElmProps(elementAttrs){
+                console.log('updateElmProps',elementAttrs);
+                let elementExpr = $('#node-config-input-expression').val();
+                elementAttrs = elementAttrs === undefined ? node.elmProps : elementAttrs;
+                node.elmProps = [];
+                $("#elmPropsGrid").jsGrid("loadData");
+                let lastXpathTokenParams = getLastTokenParams(elementExpr);
+                $.each(elementAttrs, (i, e) => {
+                    let item = { propName: i, propValue: e };
+                    if (lastXpathTokenParams.includes(i)) {
+                        item.includeProp = true;
+                    }
+                    console.log(item);
+                    node.elmProps.push(item);
+                });
+                $("#elmPropsGrid").jsGrid("loadData", node.elmProps).done(function () {
+                    console.log('Elm Props Loaded:', node.elmProps);
+                });
+                
+            }
+
+            function updateXpath(item, add) {
+                console.log('updateXpath', item, ',', add);
+                let $xpNow = $('#node-config-input-expressionCustom');
+                let xpathNow = $xpNow.val();
+                if (add === true) {
+                    let lastTokenParams = getLastTokenParams(xpathNow);
+                    if (!lastTokenParams.includes(item.propName)) {
+                        xpathNow += '[@' + item.propName + '="' + item.propValue + '"]';
+                    }
+                } else {
+                    let propRx = new RegExp('\\[@' + item.propName + '=.*?\\]', 'g');
+                    xpathNow = xpathNow.replace(propRx, '');
+                }
+                $xpNow.val(xpathNow);
+                if($xpNow.val().trim()=== $('#node-config-input-expressionShort').val().trim()){
+                    $('#node-config-input-expressionMode').val('auto');
+                }else{
+                    $('#node-config-input-expressionMode').val('custom');
+                }
+                updateElmExpression();
+            }
+
+            function updateElmExpression(){
+                
+                let elmExpressionMode = $('#node-config-input-expressionMode').val();
+                let elementExpr;
+                console.log('updateElmExpression', elmExpressionMode);
+                if (elmExpressionMode === 'none') {
+                    elementExpr = $('#node-config-input-expressionFull').val();
+                    $('#node-config-input-expression').prop('readonly', true)
+                } else if (elmExpressionMode === 'auto') {
+                    elementExpr = $('#node-config-input-expressionShort').val();
+                    $('#node-config-input-expression').prop('readonly', true)
+                } else if (elmExpressionMode === 'custom') {
+                    elementExpr = $('#node-config-input-expressionCustom').val();
+                    $('#node-config-input-expression').prop('readonly', false)
+                }
+                console.log('updateElmExpression', elementExpr);
+                $('#node-config-input-expression').val(elementExpr);
+            }
+
+            function updateExpression(elementExpr, selector, elementAttrs, elementExprFull, elementExprShort) {
+                console.log('updateExpression', elementAttrs, ' : ',elementExprShort);
+                $('#node-config-input-expressionCustom').val(elementExprShort);
+                $('#node-config-input-expressionShort').val(elementExprShort);
+                $('#node-config-input-expressionFull').val(elementExprFull);
+                updateElmExpression();
+                updateElmProps(elementAttrs);
+                $('#node-config-input-selector').val(selector);
+                $('#node-config-input-expression').parsley().validate();
+
+            }
+
 //TODO: DRY
             await initFinderConnection();
             if (window.sessionId !== undefined) {
@@ -394,6 +580,7 @@
         },
         oneditsave: async function () {
             var fp = $("node-config-input-framePath");
+            
             if ($(fp).val() == "") {
                 this.framePath = "'Main Frame";
             }

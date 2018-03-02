@@ -1,0 +1,11 @@
+.eslint*
+gulpfile.js
+logs
+*.log
+npm-debug.log*
+*.bak
+*.orig
+**/tmp/**
+.gitignore
+.gitattributes
+.htmlintrc
