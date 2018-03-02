@@ -1,6 +1,6 @@
 {
   "name": "opal-node-control-flow",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Set of nodes to aid with control flow constructs in opal",
   "repository": {
     "type": "git",

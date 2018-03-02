@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.4.3"></a>
+## [0.4.3](https://github.com/telligro/opal-nodes/compare/opal-node-ui-web-browser@0.4.2...opal-node-ui-web-browser@0.4.3) (2018-03-02)
+
+
+### Bug Fixes
+
+* **ui-web-browser:** preserve textfield edits to custom element expression ([#18](https://github.com/telligro/opal-nodes/issues/18)) ([d5c3082](https://github.com/telligro/opal-nodes/commit/d5c3082))
+
+
+
+
+
 <a name="0.4.2"></a>
 ## 0.4.2 (2018-03-02)
 
