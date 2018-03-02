@@ -502,6 +502,7 @@ module.exports = function(RED) {
             {name: 'name'}, {name: 'mode'}, {name: 'asis'},
             {name: 'asjson'}, {name: 'useLabel'},
             {name: 'removeEmpty'}, {name: 'actionType'},
+            {name: 'contents', type: 'contentsType'},
         ]);
 
         // FIXME:Cleanup
@@ -584,7 +585,11 @@ module.exports = function(RED) {
                                 contents = readRegion(requiredSheet, msgParams.region, opts);
                             }
                         } else {
-                            contents = requiredSheet;
+                            if (msgParams.actionType == 'write') {
+                                contents = xlsx.utils.aoa_to_sheet(msgParams.contents);
+                            } else {
+                                contents = requiredSheet;
+                            }
                         }
                         if (msgParams.actionType == 'write') {
                             workbook.Sheets[msgParams.sheet] = contents;
@@ -704,6 +709,8 @@ module.exports = function(RED) {
         this.removeEmpty = params.removeEmpty;
         this.store = params.store;
         this.storeType = params.storeType;
+        this.contents = params.contents;
+        this.contentsType = params.contentsType;
         this.waitfor = params.waitfor;
         let node = this;
         this.on('input', function(msg) {
