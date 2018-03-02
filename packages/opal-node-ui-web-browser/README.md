@@ -1,4 +1,4 @@
-[![opal-node-ui-web-browser build status](https://frozen-fortress-98851.herokuapp.com/telligro/opal-nodes/7/badge?subject=build)](https://travis-ci.org/telligro/opal-nodes) [![npm (scoped)](https://img.shields.io/npm/v/@telligro/opal-node-ui-web-browser.svg)](https://www.npmjs.com/package/@telligro/opal-node-ui-web-browser) [![license](https://img.shields.io/github/license/telligro/opal-node-red.svg)](LICENSE)
+[![opal-node-ui-web-browser build status](https://frozen-fortress-98851.herokuapp.com/telligro/opal-nodes/7/badge?subject=build)](https://travis-ci.org/telligro/opal-nodes) [![npm (scoped)](https://img.shields.io/npm/v/opal-node-ui-web-browser.svg)](https://www.npmjs.com/package/opal-node-ui-web-browser) [![license](https://img.shields.io/github/license/telligro/opal-node-red.svg)](LICENSE)
 ## opal-node-ui-web-browser 
 ### This module is part of the OPAL framework
 #### Nodes: 

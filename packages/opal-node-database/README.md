@@ -1,4 +1,4 @@
-[![opal-node-database build status](https://frozen-fortress-98851.herokuapp.com/telligro/opal-nodes/2/badge?subject=build)](https://travis-ci.org/telligro/opal-nodes) [![npm (scoped)](https://img.shields.io/npm/v/@telligro/opal-node-database.svg)](https://www.npmjs.com/package/@telligro/opal-node-database)
+[![opal-node-database build status](https://frozen-fortress-98851.herokuapp.com/telligro/opal-nodes/2/badge?subject=build)](https://travis-ci.org/telligro/opal-nodes) [![npm (scoped)](https://img.shields.io/npm/v/opal-node-database.svg)](https://www.npmjs.com/package/opal-node-database)
 ## opal-node-database
 ### This module is part of the OPAL framework
 ### Nodes: 

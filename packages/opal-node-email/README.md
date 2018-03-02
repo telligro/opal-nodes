@@ -1,4 +1,4 @@
-[![opal-node-email build status](https://frozen-fortress-98851.herokuapp.com/telligro/opal-nodes/3/badge?subject=build)](https://travis-ci.org/telligro/opal-nodes) [![npm (scoped)](https://img.shields.io/npm/v/@telligro/opal-node-email.svg)](https://www.npmjs.com/package/@telligro/opal-node-email)
+[![opal-node-email build status](https://frozen-fortress-98851.herokuapp.com/telligro/opal-nodes/3/badge?subject=build)](https://travis-ci.org/telligro/opal-nodes) [![npm (scoped)](https://img.shields.io/npm/v/opal-node-email.svg)](https://www.npmjs.com/package/opal-node-email)
 ## opal-node-email
 ### This module is part of the OPAL framework
 #### Nodes: 
