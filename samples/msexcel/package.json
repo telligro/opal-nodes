@@ -1,0 +1,14 @@
+{
+    "name": "msexcel",
+    "description": "Excel node based flows",
+    "version": "0.0.1",
+    "dependencies": {
+        "opal-node-msexcel": "0.4.4"
+    },
+    "node-red": {
+        "settings": {
+            "flowFile": "flow.json",
+            "credentialsFile": "flow_cred.json"
+        }
+    }
+}
