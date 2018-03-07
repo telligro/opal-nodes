@@ -442,6 +442,7 @@ module.exports = function(RED) {
 
     function identifyPage(node, msg) {
         try {
+            node.timeout = (node.timeout && node.timeout != '') ? parseInt(node.timeout) : parseInt(msg.timeout);
             node.sessionDriver.wait(() => {
                 return identify(node.sessionDriver, getPageIdentity(node), node.timeout);
             }, node.timeout, 'Identify failed').then(function(identified) {
@@ -716,7 +717,8 @@ module.exports = function(RED) {
                 flowContext[key] = node.context().flow.get(key);
             });
             // console.log('Flow Context ready. Starting Execution')
-            node.sessionDriver.manage().timeouts().setScriptTimeout(parseInt(node.timeout)).then(() => {
+            node.timeout = (node.timeout && node.timeout != '') ? parseInt(node.timeout) : parseInt(msg.timeout);
+            node.sessionDriver.manage().timeouts().setScriptTimeout(node.timeout).then(() => {
                 return node.sessionDriver.executeAsyncScript(util.format(tryCatchWrap, node.func), msg.element, msg, flowContext).then(function(results) {
                     console.log('Execution complete');
                     console.log('results %s', arguments.length);
@@ -876,7 +878,8 @@ module.exports = function(RED) {
                 driver.get(node.pageObj.url);
                 if (node.pageObj.url) {
                     console.log('Page Defined');
-                    driver.wait(until.urlContains(node.pageObj.url), parseInt(node.timeout)).catch(function(errorback) {
+                    node.timeout = (node.timeout && node.timeout != '') ? parseInt(node.timeout) : parseInt(msg.timeout);
+                    driver.wait(until.urlContains(node.pageObj.url), node.timeout).catch(function(errorback) {
                         node.status({
                             fill: 'yellow',
                             shape: 'ring',
